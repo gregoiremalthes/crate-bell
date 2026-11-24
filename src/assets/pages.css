@@ -1,0 +1,190 @@
+/* Extension pages (popup and guide). Fonts ship with the extension: no request leaves the browser. */
+@font-face {
+  font-family: "Crate Bell Serif";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/fraunces-soft.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Crate Bell Sans";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url("/fonts/dm-sans.woff2") format("woff2");
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-variation-settings: "SOFT" 100;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}
+a:hover {
+  background: var(--pink-soft);
+}
+a:focus-visible {
+  outline: var(--stroke-2) solid var(--focus);
+  outline-offset: 2px;
+}
+
+.cb-rule {
+  height: 2px;
+  border: 0;
+  margin: 0;
+  background: var(--pink);
+}
+
+/* ---------- Form controls ---------- */
+.cb-field {
+  display: grid;
+  gap: var(--space-8);
+}
+.cb-field__label {
+  font-weight: 500;
+}
+.cb-select {
+  appearance: none;
+  min-height: var(--control-h);
+  padding: 0 40px 0 var(--space-16);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-8);
+  background: var(--paper)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E")
+    no-repeat right 10px center;
+  font: 400 16px / 24px var(--font-sans);
+  color: var(--ink);
+}
+.cb-select:hover {
+  background-color: var(--pink-soft);
+}
+.cb-select:focus-visible {
+  outline: var(--stroke-2) solid var(--focus);
+  outline-offset: 2px;
+}
+
+.cb-choices {
+  display: grid;
+  gap: var(--space-8);
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.cb-choices legend {
+  font-weight: 500;
+  margin-bottom: var(--space-8);
+  padding: 0;
+}
+.cb-choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: var(--space-12);
+  align-items: start;
+  padding: var(--space-12) var(--space-16);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-8);
+  cursor: pointer;
+}
+.cb-choice:hover {
+  background: var(--pink-soft);
+}
+.cb-choice:has(input:checked) {
+  background: var(--pink);
+  border-color: var(--on-pink);
+}
+.cb-choice input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: #000;
+}
+.cb-choice input:focus-visible {
+  outline: var(--stroke-2) solid var(--focus);
+  outline-offset: 2px;
+}
+.cb-choice__title {
+  display: block;
+  font-weight: 500;
+}
+.cb-choice__text {
+  display: block;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.cb-check {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  min-height: 40px;
+  cursor: pointer;
+}
+.cb-check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #000;
+}
+
+.cb-status {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: var(--space-12);
+  align-items: start;
+}
+.cb-status__dot {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: var(--stroke-2) solid var(--line);
+}
+.cb-status--on .cb-status__dot {
+  background: var(--green-soft);
+  border-color: var(--green-ink);
+  color: var(--green-ink);
+}
+.cb-status--off .cb-status__dot {
+  background: var(--amber-soft);
+  border-color: var(--amber-ink);
+  color: var(--amber-ink);
+}
+.cb-status--unknown .cb-status__dot {
+  background: var(--pink-soft);
+}
+.cb-status__title {
+  font-weight: 500;
+}
+.cb-status__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+}
+
+.cb-saved {
+  min-height: 20px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--green-ink);
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<!-- Reduced copy of Discogs' "Items I Want" page with the save drawer open (observed on 2026-11-24). -->
+<html lang="en">
+  <head><title>Vinyl Records and CDs from my Wantlist - Discogs Marketplace</title></head>
+  <body>
+    <main>
+      <div data-test="desktop-layout">
+        <p>Applied Filters (1):</p>
+        <button type="submit" aria-label="Remove Release: Seiji5"></button>
+        <button type="submit" data-test="button-save-search">Save Search</button>
+        <p>2 Saved Searches</p>
+        <select aria-labelledby="saved-searches" class="brand-select w-full" data-test="saved-searches">
+          <option value="-1">Select a Saved Search</option>
+          <option value="371766">Champion Soul – Wha' Cha Got?</option>
+          <option value="383573">Seiji - Seiji5</option>
+        </select>
+      </div>
+    </main>
+    <div role="dialog" id="radix-_shop-app-r_8d_" data-state="open" data-slot="sheet-content">
+      <h2>Save Search</h2>
+      <label for="save-search-name">Name</label>
+      <input id="save-search-name" data-test="input-filter-name" value="My Saved Search 3" />
+      <p>Notification Settings</p>
+      <p>Your current wantlist <a href="/settings/notifications">notification-settings</a>:</p>
+      <label><input type="checkbox" disabled checked /> Personal email</label>
+      <input type="radio" name="notification-preference" id="daily-digest" value="digest" checked />
+      <input type="radio" name="notification-preference" id="realtime-notifications" value="realtime" />
+      <input type="radio" name="notification-preference" id="no-notifications" value="no" />
+      <button type="submit">Cancel</button>
+      <button type="submit" data-test="button-drawer-save-search">Save Search</button>
+    </div>
+  </body>
+</html>

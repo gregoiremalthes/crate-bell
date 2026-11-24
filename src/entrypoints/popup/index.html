@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crate Bell</title>
+    <meta name="manifest.default_title" content="Crate Bell" />
+  </head>
+  <body class="cb-root">
+    <main class="popup">
+      <header class="popup__bar">
+        <span class="cb-disc cb-disc--xs" id="bar-icon"></span>
+        <h1 class="popup__title">Crate Bell</h1>
+      </header>
+
+      <section class="popup__section" aria-labelledby="email-title">
+        <h2 class="popup__h2" id="email-title" data-i18n="emailSectionTitle"></h2>
+        <div id="email-status"></div>
+      </section>
+
+      <hr class="cb-rule" />
+
+      <section class="popup__section" aria-labelledby="prefs-title">
+        <h2 class="popup__h2" id="prefs-title" data-i18n="prefsSectionTitle"></h2>
+        <div id="prefs" class="popup__prefs"></div>
+        <button type="button" class="cb-link" id="more-prefs" data-i18n="prefsMore"></button>
+      </section>
+
+      <hr class="cb-rule" />
+
+      <section class="popup__section popup__help">
+        <button type="button" class="cb-btn cb-btn--secondary cb-btn--sm" id="how" data-i18n="howItWorks"></button>
+        <button type="button" class="cb-btn cb-btn--secondary cb-btn--sm" id="remove" data-i18n="popupRemoveAlert"></button>
+      </section>
+
+      <footer class="popup__footer">
+        <a id="coffee" class="popup__coffee" target="_blank" rel="noopener"><span id="coffee-icon"></span><span data-i18n="coffeeLink"></span></a>
+        <p class="cb-small cb-muted" data-i18n="notAffiliated"></p>
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

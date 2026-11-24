@@ -1,0 +1,48 @@
+name: Discogs smoke test
+
+# Weekly check that Discogs' public pages still have what Crate Bell anchors to.
+# Logged-out pages only; a failure means "look at docs/discovery.md", not necessarily a broken extension.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check anchors on a release, a master and the API
+        run: |
+          set -uo pipefail
+          UA="Mozilla/5.0 (X11; Linux x86_64) CrateBellSmokeTest/1.0 (+https://github.com/gregoiremalthes/crate-bell)"
+          fetch() { curl -sL -A "$UA" -o "$2" -w '%{http_code}' "$1"; }
+          for pair in "https://www.discogs.com/release/3263269-Seiji-Seiji5 release.html" "https://www.discogs.com/master/26629-Daft-Punk-Homework master.html"; do
+            set -- $pair
+            code=$(fetch "$1" "$2")
+            if [ "$code" = "403" ] || [ "$code" = "429" ]; then
+              echo "::warning::Discogs refused the runner ($code). Skipping: not a sign of change."
+              exit 0
+            fi
+            [ "$code" = "200" ] || { echo "Unexpected status $code for $1"; exit 1; }
+          done
+          fail=0
+          grep -q 'id="release_schema"' release.html || { echo "release_schema missing"; fail=1; }
+          grep -q 'id="release-stats"' release.html || { echo "#release-stats missing"; fail=1; }
+          grep -q 'id="master_schema"' master.html || { echo "master_schema missing"; fail=1; }
+          grep -q 'id="master-statistics"' master.html || { echo "#master-statistics missing"; fail=1; }
+          curl -fsSL -A "$UA" "https://api.discogs.com/masters/26629/versions?per_page=1" | grep -q '"major_formats"' || { echo "API versions changed"; fail=1; }
+          [ "$fail" = "0" ] && echo "All anchors found."
+          exit $fail
+      - name: Open an issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Smoke test failed: Discogs may have changed" \
+            --body "See the run at $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --label discogs-changed || true

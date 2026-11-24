@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crate Bell</title>
+    <meta name="manifest.open_in_tab" content="true" />
+  </head>
+  <body class="cb-root">
+    <a class="skip" href="#main" data-i18n="skipToContent"></a>
+    <header class="top">
+      <div class="top__inner">
+        <span class="cb-brand-mark"><span class="cb-disc cb-disc--xs" id="top-icon"></span><span class="cb-serif">Crate Bell</span></span>
+        <nav aria-label="Sections" class="top__nav">
+          <a href="#email" data-i18n="navEmail"></a>
+          <a href="#how" data-i18n="navHow"></a>
+          <a href="#remove" data-i18n="navRemove"></a>
+          <a href="#preferences" data-i18n="navPreferences"></a>
+          <a href="#faq" data-i18n="navFaq"></a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <section id="welcome" class="hero">
+        <span class="cb-disc cb-disc--lg" id="hero-disc"></span>
+        <p class="overline" data-i18n="heroOverline"></p>
+        <h1 class="display" data-i18n="heroTitle"></h1>
+        <p class="lead" data-i18n="heroLead"></p>
+      </section>
+
+      <!-- Step 1 -->
+      <section id="email" class="chapter" aria-labelledby="email-h">
+        <p class="overline"><span data-i18n="stepWord"></span> 1</p>
+        <h2 class="title-1" id="email-h" data-i18n="emailChapterTitle"></h2>
+        <p data-i18n="emailChapterText"></p>
+        <div class="panel" id="email-status"></div>
+
+        <figure class="mock" aria-describedby="mock-settings-caption">
+          <div class="mock__frame" aria-hidden="true">
+            <div class="mock__url">discogs.com/settings/notifications</div>
+            <div class="mock__table">
+              <div class="mock__row mock__row--head"><span data-i18n="mockColNotifications"></span><span data-i18n="mockColEmail"></span><span></span></div>
+              <div class="mock__row mock__row--hl">
+                <span></span>
+                <span><span class="mock__box mock__box--on"></span></span>
+                <span data-i18n="mockWantlistRow"></span>
+              </div>
+              <div class="mock__row"><span><span class="mock__box mock__box--on"></span></span><span><span class="mock__box mock__box--on"></span></span><span data-i18n="mockOtherRow"></span></div>
+            </div>
+          </div>
+          <figcaption id="mock-settings-caption" data-i18n="mockSettingsCaption"></figcaption>
+        </figure>
+      </section>
+
+      <!-- Step 2 -->
+      <section id="how" class="chapter" aria-labelledby="how-h">
+        <p class="overline"><span data-i18n="stepWord"></span> 2</p>
+        <h2 class="title-1" id="how-h" data-i18n="howChapterTitle"></h2>
+        <p data-i18n="howChapterText"></p>
+
+        <ol class="tutorial">
+          <li class="tutorial__step">
+            <div class="mock mock--small" aria-hidden="true">
+              <div class="mock__frame">
+                <div class="mock__url" data-i18n="mockRecordPage"></div>
+                <div class="mock__aside">
+                  <div class="mock__btn" data-i18n="mockAddToCollection"></div>
+                  <div class="mock__btn" data-i18n="mockRemoveFromWantlist"></div>
+                  <div class="mock__btn mock__btn--pink" data-i18n="releaseSetAlert"></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 class="title-3"><span class="num">1</span> <span data-i18n="how1Title"></span></h3>
+              <p data-i18n="how1Text"></p>
+            </div>
+          </li>
+          <li class="tutorial__step">
+            <div class="mock mock--small" aria-hidden="true">
+              <div class="mock__frame">
+                <div class="mock__url" data-i18n="mockAlertPage"></div>
+                <div class="mock__aside">
+                  <div class="mock__chip" data-i18n="mockFilterChip"></div>
+                  <div class="mock__btn mock__btn--dark mock__btn--ring" data-i18n="mockSaveSearch"></div>
+                  <div class="mock__line"></div>
+                  <div class="mock__line mock__line--short"></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 class="title-3"><span class="num">2</span> <span data-i18n="how2Title"></span></h3>
+              <p data-i18n="how2Text"></p>
+            </div>
+          </li>
+          <li class="tutorial__step">
+            <div class="mock mock--small" aria-hidden="true">
+              <div class="mock__frame">
+                <div class="mock__url" data-i18n="mockSaveForm"></div>
+                <div class="mock__aside">
+                  <div class="mock__input">Seiji - Seiji5</div>
+                  <div class="mock__radio"><span class="mock__dot"></span><span data-i18n="mockDaily"></span></div>
+                  <div class="mock__radio"><span class="mock__dot mock__dot--on"></span><span data-i18n="mockRealtime"></span></div>
+                  <div class="mock__btn mock__btn--dark mock__btn--ring" data-i18n="mockSaveSearch"></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 class="title-3"><span class="num">3</span> <span data-i18n="how3Title"></span></h3>
+              <p data-i18n="how3Text"></p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="callout" id="master">
+          <span class="cb-disc cb-disc--md" id="master-disc"></span>
+          <h3 class="title-2" data-i18n="masterGuideTitle"></h3>
+          <p data-i18n="masterGuideText"></p>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section id="remove" class="chapter" aria-labelledby="remove-h">
+        <p class="overline"><span data-i18n="stepWord"></span> 3</p>
+        <h2 class="title-1" id="remove-h" data-i18n="removeChapterTitle"></h2>
+
+        <h3 class="title-3" data-i18n="removeStopTitle"></h3>
+        <p data-i18n="removeStopText1"></p>
+        <p data-i18n="removeStopText2"></p>
+
+        <h3 class="title-3" data-i18n="removeDeleteTitle"></h3>
+        <ol class="numbered">
+          <li><span data-i18n="removeDelete1"></span> <a id="open-wantlister" target="_blank" rel="noopener" data-i18n="removeOpenWantlister"></a></li>
+          <li data-i18n="removeDelete2"></li>
+          <li data-i18n="removeDelete3"></li>
+          <li data-i18n="removeDelete4"></li>
+        </ol>
+        <p class="note" data-i18n="removeDeleteNote"></p>
+      </section>
+
+      <!-- Preferences -->
+      <section id="preferences" class="chapter" aria-labelledby="prefs-h">
+        <p class="overline" data-i18n="prefsOverline"></p>
+        <h2 class="title-1" id="prefs-h" data-i18n="prefsChapterTitle"></h2>
+        <p data-i18n="prefsChapterText"></p>
+        <div class="prefs" id="prefs"></div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="chapter" aria-labelledby="faq-h">
+        <h2 class="title-1" id="faq-h" data-i18n="faqTitle"></h2>
+        <details><summary data-i18n="faq1Q"></summary><p data-i18n="faq1A"></p></details>
+        <details><summary data-i18n="faq2Q"></summary><p data-i18n="faq2A"></p></details>
+        <details><summary data-i18n="faq3Q"></summary><p data-i18n="faq3A"></p></details>
+        <details><summary data-i18n="faq4Q"></summary><p data-i18n="faq4A"></p></details>
+        <details><summary data-i18n="faq5Q"></summary><p data-i18n="faq5A"></p></details>
+        <details><summary data-i18n="faq6Q"></summary><p><span data-i18n="faq6A"></span> <a id="issues" target="_blank" rel="noopener" data-i18n="faq6Link"></a></p></details>
+      </section>
+
+      <section class="coffee" aria-labelledby="coffee-h">
+        <span class="cb-disc cb-disc--md" id="coffee-disc"></span>
+        <h2 class="title-2" id="coffee-h" data-i18n="coffeeTitle"></h2>
+        <p data-i18n="coffeeText"></p>
+        <a class="cb-btn cb-btn--primary" id="coffee" target="_blank" rel="noopener" data-i18n="coffeeLink"></a>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p class="cb-small"><span data-i18n="notAffiliated"></span> · <a id="privacy" target="_blank" rel="noopener" data-i18n="privacyLink"></a> · <a id="source" target="_blank" rel="noopener" data-i18n="sourceLink"></a></p>
+    </footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

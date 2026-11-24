@@ -1,0 +1,21 @@
+name: Something does not work
+description: Crate Bell does something unexpected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you click, what did you expect, what did you see? A screenshot helps.
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Discogs page address
+      placeholder: https://www.discogs.com/release/...
+  - type: input
+    id: version
+    attributes:
+      label: Crate Bell version
+      description: chrome://extensions shows it under the name.
