@@ -33,11 +33,17 @@ Each phase ends with something you can check. Status as of 2026-11-24.
 
 ## Phase 5. Quality (done, keep doing)
 
-- 68 unit tests (selectors on fixtures, URLs, limits, names, storage, email check, translations including house style).
-- 11 end-to-end tests: built extension in Chromium, Discogs pages served from fixtures with a small simulator of Discogs' scripts.
+- 76 unit tests (selectors on fixtures, URLs, limits, names, storage, email check, translations including house style).
+- 15 end-to-end tests: built extension in Chromium, Discogs pages served from fixtures with a small simulator of Discogs' scripts.
 - Live probe on discogs.com: detection, anchor and form pre-fill verified on the real pages (nothing saved).
 - Independent review by a separate agent: 13 findings, all fixed (false success after Cancel, late list refresh, focus loss, unconfirmed wantlist add, Back button state, per-tab pending alerts, email check timing, plurals, contrast).
 - Accessibility: 48px targets, visible focus rings, `role=status/alert` on changing messages, reduced motion respected, text contrast from Highlighter tokens (black on pink 10.5:1).
+
+## Phase 5b. Alert status and wantlist buttons (done)
+
+- Option A chosen (ADR 6): local memory of alerts, synced with Discogs' Saved Searches menu.
+- Record page: "Sale alert on" / "paused", guided deletion. Wantlist page: "Set alert" button or "Alert on" tag per record.
+- Multi-select ("one alert for the records I tick") postponed.
 
 ## Phase 6. Your test drive (next: you)
 
@@ -60,4 +66,4 @@ Each phase ends with something you can check. Status as of 2026-11-24.
 
 - Weekly smoke test watches Discogs' public pages; fix within a week when it fails.
 - Automated publishing: add `CHROME_EXTENSION_ID`, `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN` secrets and use `wxt submit` in `release.yml`.
-- Next ideas, by expected value: price filter once currency is verified; Firefox build; "you already have an alert for this record" badge on release pages; bulk alerts for a whole list.
+- Next ideas, by expected value: one alert for the records ticked on the wantlist page; price filter once currency is verified; Firefox build; bulk alerts for a whole list.

@@ -2,6 +2,12 @@
 
 ## 1.0.0 (unreleased)
 
+Added after the first review:
+
+- "Sale alert on" status on record pages once an alert exists (paused when the record left the wantlist), with guided deletion.
+- "Set alert" button and "Alert on" tag on every record of the wantlist page.
+- Crate Bell remembers its alerts and keeps that list in step with Discogs' Saved Searches menu.
+
 First version.
 
 - Pink "Set a sale alert" button on record pages, adding the record to the wantlist when needed.

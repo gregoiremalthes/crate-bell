@@ -6,12 +6,13 @@ import { refreshEmailStatusIfStale } from '@/lib/email-status';
 import { initMasterPage } from '@/lib/features/master';
 import { initReleasePage } from '@/lib/features/release';
 import { initSettingsPage } from '@/lib/features/settings';
+import { initWantlistPage } from '@/lib/features/wantlist';
 import { initWantlisterPage } from '@/lib/features/wantlister';
 import { injectFontFaces } from '@/lib/ui/content-ui';
 
 /**
  * One content script for www.discogs.com that routes by page.
- * Only release, master, "Items I Want" and notification settings pages get any UI.
+ * Only release, master, wantlist, "Items I Want" and notification settings pages get any UI.
  */
 export default defineContentScript({
   matches: ['https://www.discogs.com/*'],
@@ -53,6 +54,8 @@ export default defineContentScript({
         return startCoach();
       case 'notification-settings':
         return initSettingsPage(ctx);
+      case 'wantlist':
+        return initWantlistPage(ctx);
     }
   },
 });

@@ -20,6 +20,8 @@ describe('parseDiscogsPage', () => {
     ['/shop/mywants', { kind: 'wantlister' }],
     ['/de/shop/mywants', { kind: 'wantlister' }],
     ['/settings/notifications', { kind: 'notification-settings' }],
+    ['/mywantlist', { kind: 'wantlist' }],
+    ['/de/mywantlist', { kind: 'wantlist' }],
   ])('recognises %s', (path, expected) => {
     expect(parseDiscogsPage(path)).toEqual(expected);
   });

@@ -23,8 +23,9 @@ The number of clicks is not the main problem. Understanding is: people do not kn
 2. **Album page (master).** A card "Want any pressing of this album?": pick formats (vinyl by default), see where Discogs' "Add all versions to Wantlist" menu is, then set one alert covering all those pressings.
 3. **Alert page ("Items I Want").** A guide panel: points at "Save Search" with a pink ring, fills in the alert name and the email frequency in Discogs' form, points at the final "Save Search", then confirms and explains how the alert will stop. It never saves for the user. Discogs' limits and errors are explained in plain words.
 4. **Notification settings page.** The one line that matters is highlighted, with a hint; Crate Bell remembers whether it is on.
-5. **Popup.** Email status (on, off, unknown) with a fix button, the two main preferences, links to the guide.
-6. **Guide page** (opens at install, also the options page): three steps (turn on emails, set an alert, remove an alert), preferences, questions.
+5. **Alert status.** Once an alert exists, the record page shows "Sale alert on" (frequency, name, date) instead of the button, with "Delete this alert" and a "Set a different alert" link. If the record has left the wantlist, the alert is shown as paused, with "Put it back in my wantlist". The wantlist page (`/mywantlist`) gets a small "Set alert" button on every record, or an "Alert on" tag.
+6. **Popup.** Email status (on, off, unknown) with a fix button, the two main preferences, links to the guide.
+7. **Guide page** (opens at install, also the options page): three steps (turn on emails, set an alert, remove an alert), preferences, questions.
 
 ## User stories and acceptance criteria
 
@@ -49,6 +50,15 @@ The number of clicks is not the main problem. Understanding is: people do not kn
 **US4: emails.** The status is read from `/settings/notifications` (`input[name=email][value=5]`), at most every 6 hours while browsing, and on demand. When off, the record page card and the popup say so and link to the setting.
 
 **US5: remove an alert.** The guide page and the alert page explain: alerts stop when the record leaves the wantlist (for example added to the collection from the feedback screen); the saved alert stays until deleted from "Saved Searches" with "Delete".
+
+**US7: alert status and deletion.**
+
+- Crate Bell remembers alerts saved through it (name, records, frequency as chosen on Save, Discogs id) and learns a saved search when the user opens it in Discogs' menu (records read from the address after 1 s). See ADR 6.
+- On every visit to "Items I Want", when the menu's count label matches its entries, alerts no longer listed are forgotten.
+- Record page with a known alert: "Sale alert on" + frequency text; out of the wantlist: "Sale alert paused" + "Put it back in my wantlist" (Discogs' own button). "Set a different alert" shows the normal button.
+- "Delete this alert" opens "Items I Want", selects the alert in the menu, rings Discogs' Delete, then its confirmation. When the alert leaves the menu: "Alert deleted", and Crate Bell forgets it. Not in the menu at all: "Already gone".
+
+**US8: wantlist page.** In table layouts (with covers, text only) the button sits in the Artist - Title cell; in the large cards layout, at the bottom of each card. Clicks never reach Discogs' row (which opens the record). Known alerts show an "Alert on" tag instead.
 
 **US6: preferences.** Frequency (default realtime), minimum record and sleeve condition, hide generic sleeves, seller rating, ships from (with a European Union shortcut). Saved locally, applied to every alert URL.
 

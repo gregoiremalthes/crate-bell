@@ -286,3 +286,73 @@
   font-size: 14px;
   line-height: 20px;
 }
+
+/* ---------- "Sale alert on" status on the record page ---------- */
+.cb-alert-status {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-16);
+  background: var(--pink-soft);
+  border: var(--stroke-2) solid var(--line);
+}
+.cb-alert-status--paused {
+  background: var(--amber-soft);
+  border-color: var(--amber-ink);
+}
+.cb-alert-status__title {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  margin: 0;
+  font: 300 19px / 25px var(--font-serif);
+  font-variation-settings: "SOFT" 100;
+}
+.cb-alert-status__text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+}
+.cb-alert-status .cb-small {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.cb-release__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+/* ---------- Wantlist page ---------- */
+.cb-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  align-items: center;
+  margin-top: 6px;
+}
+.cb-row .cb-btn {
+  min-height: 36px;
+  padding: 0 var(--space-12);
+  font-size: 14px;
+  border-width: 1.5px;
+}
+.cb-row--card .cb-btn {
+  width: 100%;
+}
+.cb-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-8);
+  background: var(--pink);
+  color: var(--on-pink);
+  font: 400 14px / 20px var(--font-sans);
+  white-space: nowrap;
+}
+.cb-tag .cb-icon,
+.cb-row .cb-icon {
+  width: 18px;
+  height: 18px;
+}

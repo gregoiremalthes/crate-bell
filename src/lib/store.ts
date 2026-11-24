@@ -54,7 +54,10 @@ export const pendingAlertsItem = storage.defineItem<Record<string, PendingAlert>
 /** A pending alert is only valid for a few minutes, so an old one never pre-fills by surprise. */
 export const PENDING_TTL_MS = 10 * 60 * 1000;
 
-export function isPendingFresh(pending: PendingAlert | null | undefined, now = Date.now()): pending is PendingAlert {
+export function isPendingFresh<T extends { createdAt: number }>(
+  pending: T | null | undefined,
+  now = Date.now(),
+): pending is T {
   return !!pending && now - pending.createdAt < PENDING_TTL_MS;
 }
 
@@ -108,3 +111,81 @@ export const EMAIL_STATUS_TTL_MS = 6 * 60 * 60 * 1000;
 export const EMAIL_STATUS_RETRY_MS = 30 * 60 * 1000;
 
 export const alertsSetItem = storage.defineItem<number>('local:alertsSet', { fallback: 0 });
+
+// ---------- Alerts Crate Bell knows about ----------
+
+/**
+ * Discogs does not say which records have an alert, so Crate Bell remembers the alerts saved
+ * through it, and the ones the user opens in Discogs' "Saved Searches" menu. The list is checked
+ * against that menu every time the user visits "Items I Want" (see syncKnownAlerts).
+ */
+export interface KnownAlert {
+  name: string;
+  releaseIds: number[];
+  /** Discogs' id for the saved search, when seen in the menu. */
+  savedSearchId?: string;
+  /** "no" means the saved search sends no email. Unknown for alerts made outside Crate Bell. */
+  frequency?: Frequency | 'no';
+  /** When it was saved through Crate Bell. */
+  savedAt?: number;
+  source: 'crate-bell' | 'discogs';
+}
+
+export const knownAlertsItem = storage.defineItem<KnownAlert[]>('local:knownAlerts', { fallback: [] });
+
+const sameAlert = (a: KnownAlert, b: { savedSearchId?: string; name: string }) =>
+  (!!a.savedSearchId && a.savedSearchId === b.savedSearchId) || a.name.toLowerCase() === b.name.toLowerCase();
+
+/** Adds or updates an alert (matched by Discogs id, then by name). */
+export async function rememberAlert(alert: KnownAlert): Promise<void> {
+  const all = await knownAlertsItem.getValue();
+  const index = all.findIndex((a) => sameAlert(a, alert));
+  if (index >= 0) {
+    const previous = all[index] as KnownAlert;
+    all[index] = {
+      ...previous,
+      ...alert,
+      // What Crate Bell itself saved is more precise than what it later sees in the menu.
+      frequency: alert.frequency ?? previous.frequency,
+      savedAt: previous.savedAt ?? alert.savedAt,
+      source: previous.source === 'crate-bell' ? 'crate-bell' : alert.source,
+    };
+  } else {
+    all.push(alert);
+  }
+  await knownAlertsItem.setValue(all);
+}
+
+export async function forgetAlert(match: { savedSearchId?: string; name: string }): Promise<void> {
+  const all = await knownAlertsItem.getValue();
+  await knownAlertsItem.setValue(all.filter((a) => !sameAlert(a, match)));
+}
+
+/**
+ * Keeps only the alerts still listed in Discogs' "Saved Searches" menu, and records their ids.
+ * Call it only with the complete list (see isSavedSearchListComplete).
+ */
+export async function syncKnownAlerts(listed: { id: string; name: string }[]): Promise<void> {
+  const all = await knownAlertsItem.getValue();
+  const next: KnownAlert[] = [];
+  for (const alert of all) {
+    const found =
+      listed.find((s) => alert.savedSearchId && s.id === alert.savedSearchId) ??
+      listed.find((s) => s.name.toLowerCase() === alert.name.toLowerCase());
+    if (found) next.push({ ...alert, savedSearchId: found.id, name: found.name });
+  }
+  if (JSON.stringify(next) !== JSON.stringify(all)) await knownAlertsItem.setValue(next);
+}
+
+export function alertsForRelease(alerts: KnownAlert[], releaseId: number): KnownAlert[] {
+  return alerts.filter((a) => a.releaseIds.includes(releaseId));
+}
+
+/** Handoff from a record page to "Items I Want" when the user asks to delete an alert. */
+export interface DeleteRequest {
+  name: string;
+  savedSearchId?: string;
+  createdAt: number;
+}
+
+export const deleteRequestItem = storage.defineItem<DeleteRequest | null>('local:deleteRequest', { fallback: null });

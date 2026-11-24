@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- Reduced copy of discogs.com/mywantlist, table layout (structure observed on 2026-11-24). Sample records only. -->
+<html lang="en">
+  <head><title>My Wantlist - Discogs</title></head>
+  <body>
+    <header class="body_utiDG"><a href="/my">Dashboard</a></header>
+    <div id="page" class="with_tabs">
+      <form id="list" action="https://www.discogs.com/mywantlist" method="post">
+        <table class="release_list_table table_block table_responsive">
+          <thead><tr><th class="first"></th><th class="image"></th><th class="status"></th><th class="artist_title">Artist - Title ( Label, Catalog#)</th><th>Format</th><th>Year</th><th>Rating</th><th>Added</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr class="wantlist_r3263269 edit shortcut_navigable" tabindex="0">
+              <td class="first as_table_cell mobile_status"><input type="checkbox" name="cw_releases" value="3263269" title="Select this item for action" data-checkable="true"></td>
+              <td class="image as_float"><a aria-label="Seiji - Seiji5" href="/release/3263269-Seiji-Seiji5" class="thumbnail_link"></a></td>
+              <td class="status hide_mobile"></td>
+              <td class="artist_title pr-12" data-followable=".release_title_link a">
+                <span class="release_title set_height"><a href="/artist/3812-Seiji">Seiji</a> - <span class="release_title_link"><a href="/release/3263269-Seiji-Seiji5">Seiji5</a></span> (<a href="/label/191531-Seiji">Seiji</a> - SEIJI 5)</span>
+                <span class="marketplace_for_sale_count"><a href="/sell/release/3263269"><strong>3 For Sale</strong></a> from €4.73</span>
+              </td>
+              <td class="has_header cell_collapsed">12", Single</td>
+              <td class="has_header cell_collapsed">2011</td>
+              <td class="has_header cell_collapsed"></td>
+              <td class="has_header cell_collapsed"><span title="Nov 24, 2026 02:53 PM">about 2 hours ago</span></td>
+              <td class="notes has_header cell_collapsed"></td>
+            </tr>
+            <tr class="wantlist_r3235 edit shortcut_navigable" tabindex="0">
+              <td class="first as_table_cell mobile_status"><input type="checkbox" name="cw_releases" value="3235" title="Select this item for action" data-checkable="true"></td>
+              <td class="image as_float"><a aria-label="Daft Punk - Homework" href="/release/3235-Daft-Punk-Homework" class="thumbnail_link"></a></td>
+              <td class="status hide_mobile"></td>
+              <td class="artist_title pr-12" data-followable=".release_title_link a">
+                <span class="release_title set_height"><a href="/artist/1289-Daft-Punk">Daft Punk</a> - <span class="release_title_link"><a href="/release/3235-Daft-Punk-Homework">Homework</a></span> (<a href="/label/1003-Virgin">Virgin</a> - CDV 2821)</span>
+                <span class="marketplace_for_sale_count"><a href="/sell/release/3235"><strong>50 For Sale</strong></a> from €4.00</span>
+              </td>
+              <td class="has_header cell_collapsed">CD, Album</td>
+              <td class="has_header cell_collapsed">1997</td>
+              <td class="has_header cell_collapsed"></td>
+              <td class="has_header cell_collapsed"><span>1 day ago</span></td>
+              <td class="notes has_header cell_collapsed"></td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+    <script>
+      // Like Discogs: clicking the artist/title cell opens the record.
+      for (const cell of document.querySelectorAll('td[data-followable]')) {
+        cell.addEventListener('click', () => { location.href = cell.querySelector('.release_title_link a').href; });
+      }
+    </script>
+  </body>
+</html>

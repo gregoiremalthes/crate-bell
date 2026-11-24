@@ -140,3 +140,84 @@ test('keyboard focus stays on the control the user pressed', async ({ page }) =>
   await expect(chip).toHaveAttribute('aria-pressed', 'true');
   await expect(chip).toBeFocused();
 });
+
+test('after saving, the record page says the alert is on, and guides its deletion', async ({ page }) => {
+  await page.goto('https://www.discogs.com/release/3235-Daft-Punk-Homework');
+  await card(page).getByRole('button', { name: "Alert me when it's for sale" }).click();
+  await page.waitForURL(/\/shop\/mywants\//);
+  await coach(page).getByRole('button', { name: 'Open the save form' }).click();
+  await page.locator('[data-test="button-drawer-save-search"]').click();
+  await expectVisibleText(coach(page), 'Your sale alert is set');
+
+  // Back on the record: no more button, the alert's status instead. The page copy shows the record
+  // out of the wantlist (as after a purchase), so the alert is shown as paused.
+  await page.goto('https://www.discogs.com/release/3235-Daft-Punk-Homework');
+  const status = page.locator('crate-bell-release');
+  await expectVisibleText(status, 'Sale alert paused');
+  await expectVisibleText(status, '“Daft Punk - Homework”');
+  await expect(status.getByRole('button', { name: "Alert me when it's for sale" })).toHaveCount(0);
+
+  // Delete: Crate Bell opens the alert in Discogs' menu and points at Delete; the user confirms.
+  await status.getByRole('button', { name: 'Delete the alert' }).click();
+  await page.waitForURL(/\/shop\/mywants\//);
+  await expectVisibleText(coach(page), 'Delete this alert');
+  await expect(page.locator('[data-test="saved-searches"]')).toHaveValue('999999');
+  await page
+    .locator('[data-test="desktop-layout"] button', { hasText: /^Delete$/ })
+    .first()
+    .click();
+  await expectVisibleText(coach(page), 'Click Delete again');
+  await page.getByText('Are you sure').locator('..').getByRole('button', { name: 'Delete' }).click();
+  await expectVisibleText(coach(page), 'Alert deleted');
+
+  await page.goto('https://www.discogs.com/release/3235-Daft-Punk-Homework');
+  await expect(card(page).getByRole('button', { name: "Alert me when it's for sale" })).toBeVisible();
+});
+
+test("an alert opened in Discogs' Saved Searches menu is learned", async ({ page }) => {
+  await page.goto('https://www.discogs.com/shop/mywants/');
+  await page.locator('[data-test="saved-searches"]').selectOption('383573');
+  await page.waitForTimeout(1_500);
+  await page.goto('https://www.discogs.com/release/3263269-Seiji-Seiji5');
+  const status = page.locator('crate-bell-release');
+  await expectVisibleText(status, 'Sale alert on');
+  await expectVisibleText(status, 'Saved on your Discogs account.');
+  // Escape hatch when the memory is out of date.
+  await status.getByRole('button', { name: 'Set a different alert' }).click();
+  await expect(card(page).getByRole('button', { name: 'Set a sale alert' })).toBeVisible();
+});
+
+test('known alert: "on" on the record page, a tag on the wantlist, a button elsewhere', async ({
+  page,
+  serviceWorker,
+}) => {
+  await serviceWorker.evaluate(() =>
+    // biome-ignore lint/suspicious/noExplicitAny: the chrome global only exists inside the extension
+    (globalThis as any).chrome.storage.local.set({
+      knownAlerts: [{ name: 'Seiji - Seiji5', releaseIds: [3263269], source: 'crate-bell', frequency: 'realtime' }],
+    }),
+  );
+  await page.goto('https://www.discogs.com/release/3263269-Seiji-Seiji5');
+  await expectVisibleText(page.locator('crate-bell-release'), 'Sale alert on');
+  await expectVisibleText(page.locator('crate-bell-release'), 'Discogs emails you as soon as a copy is listed.');
+
+  await page.goto('https://www.discogs.com/mywantlist');
+  const seiji = page.locator('tr.wantlist_r3263269 crate-bell-row');
+  const homework = page.locator('tr.wantlist_r3235 crate-bell-row');
+  await expect(seiji).toContainText('Alert on');
+  await expect(homework.getByRole('button', { name: 'Set a sale alert for Homework' })).toBeVisible();
+
+  // Clicking our button must not trigger Discogs' "open the record" on the row.
+  await homework.getByRole('button').click();
+  await page.waitForURL(/\/shop\/mywants\/\?release=3235$/);
+  await expectVisibleText(coach(page), 'Almost there');
+  await coach(page).getByRole('button', { name: 'Open the save form' }).click();
+  await expect(page.locator('#save-search-name')).toHaveValue('Daft Punk - Homework');
+});
+
+test('wantlist page, large cards layout', async ({ page }) => {
+  await page.goto('https://www.discogs.com/mywantlist?layout=big');
+  await expect(
+    page.locator('li.card crate-bell-row').getByRole('button', { name: 'Set a sale alert for Seiji5' }),
+  ).toBeVisible();
+});

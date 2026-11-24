@@ -6,7 +6,16 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!.output", "!.wxt", "!store-assets", "!docs/**/*.html", "!test-results", "!playwright-report"]
+    "includes": [
+      "**",
+      "!.output",
+      "!.wxt",
+      "!store-assets",
+      "!docs/**/*.html",
+      "!test-results",
+      "!playwright-report",
+      "!tests/fixtures"
+    ]
   },
   "formatter": {
     "enabled": true,

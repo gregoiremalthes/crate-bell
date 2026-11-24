@@ -154,3 +154,61 @@ describe('notification settings', () => {
     expect(parseEmailSetting(other)).toBe('unknown');
   });
 });
+
+describe('saved searches menu', () => {
+  it('lists the saved searches and knows when the list is complete', async () => {
+    const { readSavedSearches, isSavedSearchListComplete } = await import('@/lib/discogs/selectors');
+    const doc = fixture('wantlister.html');
+    expect(readSavedSearches(doc)).toEqual([
+      { id: '371766', name: "Champion Soul – Wha' Cha Got?" },
+      { id: '383573', name: 'Seiji - Seiji5' },
+    ]);
+    expect(isSavedSearchListComplete(doc)).toBe(true);
+    (doc.getElementById('saved-searches') as HTMLElement).textContent = '5 Saved Searches';
+    expect(isSavedSearchListComplete(doc)).toBe(false);
+  });
+
+  it('opens a saved search and finds Delete, then the confirmation', async () => {
+    const { selectSavedSearch, readSelectedSavedSearch, findDeleteButton, findDeleteConfirmBox } = await import(
+      '@/lib/discogs/selectors'
+    );
+    const doc = fixture('wantlister.html');
+    const select = doc.querySelector('select') as HTMLSelectElement;
+    let changes = 0;
+    select.addEventListener('change', () => changes++);
+    expect(selectSavedSearch('383573', doc)).toBe(true);
+    expect(selectSavedSearch('nope', doc)).toBe(false);
+    expect(changes).toBe(1);
+    expect(readSelectedSavedSearch(doc)).toEqual({ id: '383573', name: 'Seiji - Seiji5' });
+
+    select.insertAdjacentHTML(
+      'afterend',
+      '<div id="actions"><button>Update Search</button><button>Delete</button></div>',
+    );
+    expect(findDeleteButton(doc)?.parentElement?.id).toBe('actions');
+    doc
+      .getElementById('actions')
+      ?.insertAdjacentHTML(
+        'beforeend',
+        '<div id="box"><p>Are you sure you want to delete this saved search?</p><div><button>Cancel</button><button>Delete</button></div></div>',
+      );
+    expect(findDeleteConfirmBox(doc)?.id).toBe('box');
+    expect(findDeleteButton(doc)?.closest('#box')).not.toBeNull();
+  });
+});
+
+describe('wantlist page', () => {
+  it('reads records in the table and card layouts', async () => {
+    const { readWantlistItems } = await import('@/lib/discogs/selectors');
+    const table = readWantlistItems(fixture('wantlist.html'));
+    expect(table.map((i) => [i.releaseId, i.layout, i.artists, i.title])).toEqual([
+      [3263269, 'table', ['Seiji'], 'Seiji5'],
+      [3235, 'table', ['Daft Punk'], 'Homework'],
+    ]);
+    expect(table[0]?.anchor.className).toContain('artist_title');
+    const cards = readWantlistItems(fixture('wantlist-cards.html'));
+    expect(cards.map((i) => [i.releaseId, i.layout, i.artists, i.title])).toEqual([
+      [3263269, 'card', ['Seiji'], 'Seiji5'],
+    ]);
+  });
+});

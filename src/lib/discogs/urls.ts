@@ -11,6 +11,7 @@ export type DiscogsPage =
   | { kind: 'release'; id: number }
   | { kind: 'master'; id: number }
   | { kind: 'wantlister' }
+  | { kind: 'wantlist' }
   | { kind: 'notification-settings' }
   | { kind: 'other' };
 
@@ -20,6 +21,7 @@ const RELEASE_RE = new RegExp(`^${LOCALE}/release/(\\d+)(?:[-/]|$)`);
 const MASTER_RE = new RegExp(`^${LOCALE}/master/(\\d+)(?:[-/]|$)`);
 const WANTLISTER_RE = new RegExp(`^${LOCALE}/shop/mywants/?$`);
 const SETTINGS_RE = new RegExp(`^${LOCALE}/settings/notifications/?$`);
+const WANTLIST_RE = new RegExp(`^${LOCALE}/mywantlist/?$`);
 
 export function parseDiscogsPage(pathname: string): DiscogsPage {
   const release = RELEASE_RE.exec(pathname);
@@ -28,6 +30,7 @@ export function parseDiscogsPage(pathname: string): DiscogsPage {
   if (master) return { kind: 'master', id: Number(master[1]) };
   if (WANTLISTER_RE.test(pathname)) return { kind: 'wantlister' };
   if (SETTINGS_RE.test(pathname)) return { kind: 'notification-settings' };
+  if (WANTLIST_RE.test(pathname)) return { kind: 'wantlist' };
   return { kind: 'other' };
 }
 

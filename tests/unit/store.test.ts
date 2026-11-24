@@ -84,3 +84,48 @@ describe('pending alerts per record', () => {
     expect(await findPendingAlert([9])).toBeNull();
   });
 });
+
+describe('known alerts', () => {
+  beforeEach(async () => {
+    fakeBrowser.reset();
+    const { knownAlertsItem } = await import('@/lib/store');
+    await knownAlertsItem.setValue([]);
+  });
+
+  it('remembers, updates by id or name, and keeps what Crate Bell saved', async () => {
+    const { rememberAlert, knownAlertsItem, alertsForRelease } = await import('@/lib/store');
+    await rememberAlert({
+      name: 'Seiji - Seiji5',
+      releaseIds: [1],
+      frequency: 'realtime',
+      savedAt: 5,
+      source: 'crate-bell',
+    });
+    // Later seen in Discogs' menu: gains its id, keeps frequency, date and source.
+    await rememberAlert({ name: 'seiji - seiji5', savedSearchId: '42', releaseIds: [1], source: 'discogs' });
+    const [alert] = await knownAlertsItem.getValue();
+    expect(alert).toMatchObject({ savedSearchId: '42', frequency: 'realtime', savedAt: 5, source: 'crate-bell' });
+    expect(alertsForRelease(await knownAlertsItem.getValue(), 1)).toHaveLength(1);
+    expect(alertsForRelease(await knownAlertsItem.getValue(), 2)).toHaveLength(0);
+  });
+
+  it("follows Discogs' menu: forgets deleted alerts, follows renamed ones by id", async () => {
+    const { rememberAlert, knownAlertsItem, syncKnownAlerts } = await import('@/lib/store');
+    await rememberAlert({ name: 'Kept', savedSearchId: '1', releaseIds: [1], source: 'crate-bell' });
+    await rememberAlert({ name: 'Renamed', savedSearchId: '2', releaseIds: [2], source: 'crate-bell' });
+    await rememberAlert({ name: 'Deleted', releaseIds: [3], source: 'crate-bell' });
+    await syncKnownAlerts([
+      { id: '1', name: 'Kept' },
+      { id: '2', name: 'New name' },
+    ]);
+    expect((await knownAlertsItem.getValue()).map((a) => a.name)).toEqual(['Kept', 'New name']);
+  });
+
+  it('forgets one alert', async () => {
+    const { rememberAlert, knownAlertsItem, forgetAlert } = await import('@/lib/store');
+    await rememberAlert({ name: 'A', releaseIds: [1], source: 'crate-bell' });
+    await rememberAlert({ name: 'B', savedSearchId: '9', releaseIds: [2], source: 'discogs' });
+    await forgetAlert({ name: 'whatever', savedSearchId: '9' });
+    expect((await knownAlertsItem.getValue()).map((a) => a.name)).toEqual(['A']);
+  });
+});

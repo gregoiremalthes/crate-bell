@@ -9,6 +9,8 @@ Discogs already sends these emails, but setting one up takes a hidden setting, a
 - **Record pages:** "Set a sale alert", or "Alert me when it's for sale" (adds the record to your wantlist first).
 - **Album pages:** one alert for every pressing you would accept, for example all vinyl versions.
 - **Discogs' alert page:** a guide that points at the right button, fills in the alert name and email frequency, and confirms when it is saved. You always click Save yourself.
+- **Alert status:** once an alert exists, the record page says "Sale alert on" (or "paused" if the record left your wantlist) and guides its deletion.
+- **Wantlist page:** a small "Set alert" button on every record, an "Alert on" tag where one exists.
 - **Email check:** tells you when the one Discogs setting alerts need is off, and takes you there.
 - **Your usual filters, set once:** condition, sleeve, generic sleeves, seller rating, ships from.
 - English, French, German. No account, no ads, no tracking. Not affiliated with Discogs.

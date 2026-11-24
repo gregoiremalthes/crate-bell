@@ -36,6 +36,9 @@ HOW IT WORKS
 ANY PRESSING WILL DO?
 On an album's main page (Discogs calls it a master release), set one alert for every pressing you would accept, for example all vinyl versions.
 
+SEE WHICH RECORDS HAVE AN ALERT
+Once an alert is set, the record page says "Sale alert on" instead of the button, and your wantlist page shows an "Alert on" tag. Every other record in your wantlist gets a small "Set alert" button.
+
 YOUR USUAL FILTERS, SET ONCE
 Email right away or once a day, minimum record and sleeve condition, no generic sleeves, seller rating, ships from (with a one-click European Union choice).
 

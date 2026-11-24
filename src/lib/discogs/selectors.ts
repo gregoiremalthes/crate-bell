@@ -26,6 +26,12 @@ export const SEL = {
   drawerSaveButton: '[data-test="button-drawer-save-search"]',
   frequencyRadio: (value: string) => `input[type="radio"][name="notification-preference"][value="${value}"]`,
 
+  savedSearchesCount: '#saved-searches',
+
+  // Wantlist page (/mywantlist): table rows (standard and small layouts) and cards (large layout)
+  wantlistRow: 'tr[class*="wantlist_r"]',
+  wantlistCard: 'li.card[data-object-type="release"][data-object-id]',
+
   // Notification settings page
   wantlistEmailCheckbox: 'input[type="checkbox"][name="email"][value="5"]',
 } as const;
@@ -189,10 +195,78 @@ export function findOpenDrawer(root: ParentNode = document): HTMLElement | null 
   return (input?.closest(SEL.drawer) as HTMLElement | null) ?? null;
 }
 
-export function readSavedSearchNames(root: ParentNode = document): string[] {
+export interface SavedSearch {
+  id: string;
+  name: string;
+}
+
+/** The user's saved searches (alerts), as listed in Discogs' "Saved Searches" menu. */
+export function readSavedSearches(root: ParentNode = document): SavedSearch[] {
   const select = findSavedSearchesSelect(root);
   if (!select) return [];
-  return [...select.options].filter((o) => o.value !== '-1').map((o) => o.text.trim());
+  return [...select.options].filter((o) => o.value !== '-1').map((o) => ({ id: o.value, name: o.text.trim() }));
+}
+
+export function readSavedSearchNames(root: ParentNode = document): string[] {
+  return readSavedSearches(root).map((s) => s.name);
+}
+
+/**
+ * True when the menu lists every saved search: its label ("9 Saved Searches") matches the
+ * number of entries. Used before forgetting alerts that are no longer listed.
+ */
+export function isSavedSearchListComplete(root: ParentNode = document): boolean {
+  const select = findSavedSearchesSelect(root);
+  if (!select) return false;
+  const labelId = select.getAttribute('aria-labelledby');
+  const label = labelId ? root.querySelector(`#${CSS.escape(labelId)}`) : root.querySelector(SEL.savedSearchesCount);
+  const match = /(\d+)/.exec(label?.textContent ?? '');
+  return !!match && Number(match[1]) === readSavedSearches(root).length;
+}
+
+/** The saved search currently loaded in the menu, if any. */
+export function readSelectedSavedSearch(root: ParentNode = document): SavedSearch | null {
+  const select = findSavedSearchesSelect(root);
+  const option = select?.selectedOptions[0];
+  if (!select || !option || option.value === '-1') return null;
+  return { id: option.value, name: option.text.trim() };
+}
+
+/** Loads a saved search, as if the user picked it in the menu (only changes what is shown). */
+export function selectSavedSearch(id: string, root: ParentNode = document): boolean {
+  const select = findSavedSearchesSelect(root);
+  if (!select || ![...select.options].some((o) => o.value === id)) return false;
+  if (select.value === id) return true;
+  const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+  if (setter) setter.call(select, id);
+  else select.value = id;
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+  return true;
+}
+
+/** A button by its label, preferring the one on screen (Discogs renders two layouts at once). */
+function buttonByText(root: ParentNode, text: RegExp): HTMLButtonElement | null {
+  const all = [...root.querySelectorAll<HTMLButtonElement>('button')].filter((b) =>
+    text.test((b.textContent ?? '').trim()),
+  );
+  return all.find((b) => b.offsetParent !== null) ?? all[0] ?? null;
+}
+
+/** Discogs' confirmation box after "Delete": "Are you sure you want to delete this saved search?" */
+export function findDeleteConfirmBox(root: ParentNode = document): HTMLElement | null {
+  const text = [...root.querySelectorAll('p')].find((p) =>
+    /are you sure you want to delete this saved search/i.test(p.textContent ?? ''),
+  );
+  return (text?.parentElement as HTMLElement | null) ?? null;
+}
+
+/** The "Delete" button under the Saved Searches menu, or the one inside the confirmation box. */
+export function findDeleteButton(root: ParentNode = document): HTMLButtonElement | null {
+  const box = findDeleteConfirmBox(root);
+  if (box) return buttonByText(box, /^delete$/i);
+  const select = findSavedSearchesSelect(root);
+  const scope = select?.closest('aside, [data-test="desktop-layout"]') ?? root;
+  return buttonByText(scope, /^delete$/i);
 }
 
 /** Discogs' own error screen ("Put on a record; we'll be right back."). */
@@ -246,6 +320,51 @@ export function parseEmailSetting(doc: ParentNode): EmailSettingState {
   if (box) return box.defaultChecked || box.hasAttribute('checked') ? 'on' : 'off';
   const hasLoginForm = !!doc.querySelector('form[action*="login"], input[name="password"], #login');
   return hasLoginForm ? 'logged-out' : 'unknown';
+}
+
+// ---------- Wantlist page (/mywantlist) ----------
+
+export interface WantlistItem {
+  element: HTMLElement;
+  releaseId: number;
+  layout: 'table' | 'card';
+  /** Where our small control goes inside the row or card. */
+  anchor: HTMLElement;
+  artists: string[];
+  title: string;
+}
+
+/** Every record listed on the wantlist page, in the table and card layouts. */
+export function readWantlistItems(root: ParentNode = document): WantlistItem[] {
+  const items: WantlistItem[] = [];
+  for (const row of root.querySelectorAll<HTMLElement>(SEL.wantlistRow)) {
+    const id = Number(/wantlist_r(\d+)/.exec(row.className)?.[1]);
+    const anchor = row.querySelector<HTMLElement>('td.artist_title');
+    if (!id || !anchor) continue;
+    items.push({
+      element: row,
+      releaseId: id,
+      layout: 'table',
+      anchor,
+      artists: [...anchor.querySelectorAll('.release_title a[href*="/artist/"]')].map((a) =>
+        stripDisambiguation(a.textContent ?? ''),
+      ),
+      title: anchor.querySelector('.release_title_link a')?.textContent?.trim() ?? '',
+    });
+  }
+  for (const card of root.querySelectorAll<HTMLElement>(SEL.wantlistCard)) {
+    const id = Number(card.dataset.objectId);
+    if (!id) continue;
+    items.push({
+      element: card,
+      releaseId: id,
+      layout: 'card',
+      anchor: card,
+      artists: [...card.querySelectorAll('.card-artist-name a')].map((a) => stripDisambiguation(a.textContent ?? '')),
+      title: card.querySelector('a.search_result_title')?.textContent?.trim() ?? '',
+    });
+  }
+  return items;
 }
 
 export function findEmailSettingRow(root: ParentNode = document): HTMLTableRowElement | null {

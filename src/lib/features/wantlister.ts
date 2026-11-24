@@ -4,21 +4,39 @@ import { makeUnique } from '../alert-name';
 import { MAX_DAILY_DIGEST_ALERTS, MAX_SAVED_ALERTS } from '../discogs/constants';
 import {
   type DrawerError,
+  findDeleteButton,
+  findDeleteConfirmBox,
   findOpenDrawer,
   findSavedSearchesSelect,
   findSaveSearchButton,
   isDefaultAlertName,
+  isSavedSearchListComplete,
   isWantlisterDown,
   readDrawerEmailCheckbox,
   readDrawerError,
+  readSavedSearches,
   readSavedSearchNames,
+  readSelectedSavedSearch,
   SEL,
+  selectSavedSearch,
   setNativeInputValue,
 } from '../discogs/selectors';
 import { releaseIdsFromSearch } from '../discogs/urls';
 import { type MessageKey, t } from '../i18n';
 import { KOFI_URL } from '../links';
-import { alertsSetItem, clearPendingAlert, findPendingAlert, type PendingAlert } from '../store';
+import {
+  alertsSetItem,
+  clearPendingAlert,
+  type DeleteRequest,
+  deleteRequestItem,
+  type Frequency,
+  findPendingAlert,
+  forgetAlert,
+  isPendingFresh,
+  type PendingAlert,
+  rememberAlert,
+  syncKnownAlerts,
+} from '../store';
 import { icon, openGuide, Spotlight } from '../ui/content-ui';
 import { h, onDomChange, renderKeepingFocus, replaceChildren } from '../ui/dom';
 
@@ -34,7 +52,10 @@ type Step =
   | { name: 'save' }
   | { name: 'drawer'; error: DrawerError | null; emailOff: boolean }
   | { name: 'checking' }
-  | { name: 'done'; alertName: string; frequency: PendingAlert['frequency'] };
+  | { name: 'done'; alertName: string; frequency: Frequency | 'no' }
+  | { name: 'delete'; alertName: string; phase: 'pick' | 'confirm' }
+  | { name: 'deleted'; alertName: string }
+  | { name: 'delete-missing'; alertName: string };
 
 /**
  * The guide shown on Discogs' "Items I Want" page: it points at "Save Search", fills in the
@@ -72,6 +93,17 @@ class Coach {
   private formName: string | null = null;
   private nameWasFilled = false;
   private closedAt = 0;
+  /** Frequency radio checked when the user pressed Save. */
+  private formFrequency: Frequency | 'no' | null = null;
+
+  // Delete flow
+  private deleteRequest: DeleteRequest | null = null;
+  private deleteTargetId: string | null = null;
+
+  // Keeping Crate Bell's list of alerts in step with Discogs' menu
+  private lastSyncKey = '';
+  private learnTimer = 0;
+  private learnedSelection = '';
   private timers: number[] = [];
 
   constructor(container: HTMLElement) {
@@ -85,26 +117,63 @@ class Coach {
     this.stop();
     this.drawerCleanup();
     this.clearTimers();
+    clearTimeout(this.learnTimer);
     this.spotlight.destroy();
   }
 
   private async start(): Promise<void> {
-    this.pending = await findPendingAlert(releaseIdsFromSearch(window.location.search));
-    if (this.pending) this.step = { name: 'save' };
+    const deleteRequest = await deleteRequestItem.getValue();
+    if (deleteRequest && isPendingFresh(deleteRequest)) {
+      this.deleteRequest = deleteRequest;
+      this.step = { name: 'delete', alertName: deleteRequest.name, phase: 'pick' };
+    } else {
+      this.pending = await findPendingAlert(releaseIdsFromSearch(window.location.search));
+      if (this.pending) this.step = { name: 'save' };
+    }
     this.render();
-    if (this.pending) this.focusTitle();
+    if (this.pending || this.deleteRequest) this.focusTitle();
     this.stop = onDomChange(() => this.update());
     this.update();
   }
 
   private update(): void {
+    this.syncWithDiscogsList();
     if (this.dismissed) return;
     this.go(this.nextStep());
+  }
+
+  /**
+   * Keeps Crate Bell's list of alerts true to Discogs' "Saved Searches" menu: forgets deleted
+   * alerts, and learns the records of a saved search the user opens.
+   */
+  private syncWithDiscogsList(): void {
+    if (isSavedSearchListComplete()) {
+      const listed = readSavedSearches();
+      const key = JSON.stringify(listed);
+      if (key !== this.lastSyncKey) {
+        this.lastSyncKey = key;
+        void syncKnownAlerts(listed);
+      }
+    }
+    const selected = readSelectedSavedSearch();
+    const selectionKey = selected ? `${selected.id}|${selected.name}` : '';
+    if (selectionKey && selectionKey !== this.learnedSelection) {
+      // Wait until Discogs has applied the saved search's filters to the address.
+      clearTimeout(this.learnTimer);
+      this.learnTimer = window.setTimeout(() => {
+        const now = readSelectedSavedSearch();
+        const ids = releaseIdsFromSearch(window.location.search);
+        if (!now || `${now.id}|${now.name}` !== selectionKey || !ids.length) return;
+        this.learnedSelection = selectionKey;
+        void rememberAlert({ name: now.name, savedSearchId: now.id, releaseIds: ids, source: 'discogs' });
+      }, 1_000);
+    }
   }
 
   /** Works out which step the user is at, from what is on the page right now. */
   private nextStep(): Step {
     if (isWantlisterDown()) return { name: 'down' };
+    if (this.deleteRequest) return this.deleteStep(this.deleteRequest);
     if (!this.pending) return this.step.name === 'down' ? { name: 'help-closed' } : this.step;
     if (this.step.name === 'done') return this.step;
 
@@ -141,9 +210,46 @@ class Coach {
     this.clearTimers();
     this.closedAt = 0;
     const pending = this.pending as PendingAlert;
+    const frequency = this.formFrequency ?? pending.frequency;
     void clearPendingAlert(pending.releaseIds);
     void alertsSetItem.getValue().then((n) => alertsSetItem.setValue(n + 1));
-    return { name: 'done', alertName, frequency: pending.frequency };
+    const listed = readSavedSearches().find((s) => s.name.toLowerCase() === alertName.toLowerCase());
+    void rememberAlert({
+      name: alertName,
+      savedSearchId: listed?.id,
+      releaseIds: pending.releaseIds,
+      frequency,
+      savedAt: Date.now(),
+      source: 'crate-bell',
+    });
+    return { name: 'done', alertName, frequency };
+  }
+
+  /** Guides the deletion of one alert, asked for from a record page. Discogs asks to confirm. */
+  private deleteStep(request: DeleteRequest): Step {
+    const s = this.step;
+    if (s.name === 'deleted' || s.name === 'delete-missing') return s;
+    const listed = readSavedSearches();
+    const target =
+      listed.find((x) => request.savedSearchId && x.id === request.savedSearchId) ??
+      listed.find((x) => x.name.toLowerCase() === request.name.toLowerCase());
+
+    if (!target) {
+      // Gone from the menu: deleted just now (we had it selected), or already deleted before.
+      if (this.deleteTargetId || isSavedSearchListComplete()) {
+        void forgetAlert({ name: request.name, savedSearchId: request.savedSearchId });
+        void deleteRequestItem.setValue(null);
+        return this.deleteTargetId
+          ? { name: 'deleted', alertName: request.name }
+          : { name: 'delete-missing', alertName: request.name };
+      }
+      return { name: 'delete', alertName: request.name, phase: 'pick' };
+    }
+    if (this.deleteTargetId !== target.id) {
+      this.deleteTargetId = target.id;
+      selectSavedSearch(target.id);
+    }
+    return { name: 'delete', alertName: target.name, phase: findDeleteConfirmBox() ? 'confirm' : 'pick' };
   }
 
   /** A saved alert that did not exist before the form opened: the one the user just saved. */
@@ -173,6 +279,10 @@ class Coach {
     // Follow what the user types, and read the final name when they press Save.
     const readName = () => {
       if (input?.value.trim()) this.formName = input.value.trim();
+      const checked = drawer.querySelector<HTMLInputElement>('input[name="notification-preference"]:checked');
+      if (checked?.value === 'realtime' || checked?.value === 'digest' || checked?.value === 'no') {
+        this.formFrequency = checked.value;
+      }
     };
     input?.addEventListener('input', readName);
     const save = drawer.querySelector(SEL.drawerSaveButton);
@@ -217,6 +327,8 @@ class Coach {
       } else {
         this.spotlight.show(drawer?.querySelector(SEL.drawerSaveButton) ?? null, t('coachRingSave'));
       }
+    } else if (s.name === 'delete') {
+      this.spotlight.show(findDeleteButton(), t('coachRingSave'), true);
     } else if (s.name === 'help-open' && s.topic === 'delete') {
       this.spotlight.show(findSavedSearchesSelect(), t('coachRingSavedSearches'), true);
     } else {
@@ -229,6 +341,8 @@ class Coach {
     this.spotlight.hide();
     this.clearTimers();
     if (this.pending) void clearPendingAlert(this.pending.releaseIds);
+    if (this.deleteRequest) void deleteRequestItem.setValue(null);
+    this.deleteRequest = null;
     this.pending = null;
     replaceChildren(this.root);
   }
@@ -427,6 +541,39 @@ class Coach {
         return;
       }
 
+      case 'delete':
+        replaceChildren(
+          this.root,
+          this.panel([
+            title(t('coachDeleteOneTitle')),
+            text(s.phase === 'confirm' ? t('coachDeleteOneConfirm') : t('coachDeleteOnePick', s.alertName)),
+            h('p', { class: 'cb-small cb-muted' }, t('coachDeleteNote')),
+            h(
+              'div',
+              { class: 'cb-coach__actions' },
+              button('cancel', t('cancel'), () => this.close(), 'ghost'),
+            ),
+          ]),
+        );
+        return;
+
+      case 'deleted':
+      case 'delete-missing':
+        replaceChildren(
+          this.root,
+          this.panel([
+            title(s.name === 'deleted' ? t('coachDeletedTitle') : t('coachDeleteMissingTitle')),
+            text(s.name === 'deleted' ? t('coachDeletedText', s.alertName) : t('coachDeleteMissingText', s.alertName)),
+            h(
+              'div',
+              { class: 'cb-coach__actions' },
+              button('got-it', t('gotIt'), () => this.close(), 'primary'),
+              button('back', t('coachBackToRecord'), () => history.back(), 'ghost'),
+            ),
+          ]),
+        );
+        return;
+
       case 'checking':
         replaceChildren(
           this.root,
@@ -451,7 +598,9 @@ class Coach {
                 null,
                 s.frequency === 'digest'
                   ? t('coachDoneTextDigest', s.alertName)
-                  : t('coachDoneTextRealtime', s.alertName),
+                  : s.frequency === 'no'
+                    ? t('coachDoneTextNoEmail', s.alertName)
+                    : t('coachDoneTextRealtime', s.alertName),
               ),
             ),
             text(t('coachDoneRemove')),

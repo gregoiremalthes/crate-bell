@@ -9,9 +9,17 @@ import {
   readWantlistState,
   type WantlistState,
 } from '../discogs/selectors';
-import { buildWantlisterUrl, loginUrl, notificationSettingsUrl } from '../discogs/urls';
+import { buildWantlisterUrl, loginUrl, notificationSettingsUrl, wantlisterHomeUrl } from '../discogs/urls';
 import { t } from '../i18n';
-import { emailStatusItem, getPrefs, savePendingAlert } from '../store';
+import {
+  alertsForRelease,
+  deleteRequestItem,
+  emailStatusItem,
+  getPrefs,
+  type KnownAlert,
+  knownAlertsItem,
+  savePendingAlert,
+} from '../store';
 import { icon, openGuide } from '../ui/content-ui';
 import { h, onDomChange, renderKeepingFocus, replaceChildren, sleep, waitFor } from '../ui/dom';
 import { keepMounted } from './mount';
@@ -49,6 +57,10 @@ class ReleaseCard {
   private lastState: WantlistState = 'unknown';
   private stopWatching: () => void;
   private emailOff = false;
+  /** Alerts Crate Bell knows for this record (see KnownAlert). */
+  private alerts: KnownAlert[] = [];
+  /** The user asked to set another alert although one exists. */
+  private setAnyway = false;
 
   constructor(
     container: HTMLElement,
@@ -91,6 +103,18 @@ class ReleaseCard {
       this.emailOff = status?.state === 'off';
       this.render();
     });
+
+    const showAlerts = (all: KnownAlert[] | null) => {
+      this.alerts = alertsForRelease(all ?? [], this.releaseId).sort((a, b) => (b.savedAt ?? 0) - (a.savedAt ?? 0));
+      this.render();
+    };
+    void knownAlertsItem.getValue().then(showAlerts);
+    const unwatchAlerts = knownAlertsItem.watch(showAlerts);
+    const stopBeforeAlerts = this.stopWatching;
+    this.stopWatching = () => {
+      stopBeforeAlerts();
+      unwatchAlerts();
+    };
   }
 
   destroy(): void {
@@ -155,8 +179,135 @@ class ReleaseCard {
     renderKeepingFocus(this.root, () => this.draw());
   }
 
+  private async deleteAlert(alert: KnownAlert): Promise<void> {
+    await deleteRequestItem.setValue({ name: alert.name, savedSearchId: alert.savedSearchId, createdAt: Date.now() });
+    window.location.assign(wantlisterHomeUrl());
+  }
+
+  /** "Sale alert on" (or "paused" when the record left the wantlist), in place of the button. */
+  private drawAlertStatus(alert: KnownAlert): void {
+    const paused = this.lastState === 'not-in-wantlist';
+    const busy = this.view.name === 'adding';
+    const frequencyText =
+      alert.frequency === 'realtime'
+        ? t('alertOnRealtime')
+        : alert.frequency === 'digest'
+          ? t('alertOnDigest')
+          : alert.frequency === 'no'
+            ? t('alertOnNoEmail')
+            : t('alertOnUnknown');
+    const details = [`“${alert.name}”`];
+    if (alert.savedAt) {
+      details.push(t('alertSetOn', new Intl.DateTimeFormat(t('lang'), { dateStyle: 'medium' }).format(alert.savedAt)));
+    }
+    if (alert.releaseIds.length > 1) details.push(t('alertCovers', String(alert.releaseIds.length)));
+    if (this.alerts.length > 1) details.push(t('alertMore', String(this.alerts.length - 1)));
+
+    const deleteButton = h(
+      'button',
+      {
+        type: 'button',
+        class: 'cb-btn cb-btn--secondary cb-btn--sm',
+        dataset: { focusKey: 'delete' },
+        on: { click: () => void this.deleteAlert(alert) },
+      },
+      icon('trash'),
+      paused ? t('alertDeleteIt') : t('alertDelete'),
+    );
+
+    replaceChildren(
+      this.root,
+      h(
+        'div',
+        { class: `cb-alert-status${paused ? ' cb-alert-status--paused' : ''}`, role: 'status' },
+        h(
+          'p',
+          { class: 'cb-alert-status__title' },
+          icon(paused ? 'warning' : 'bell'),
+          paused ? t('alertPausedTitle') : t('alertOnTitle'),
+        ),
+        h('p', { class: 'cb-alert-status__text' }, paused ? t('alertPausedText') : frequencyText),
+        h('p', { class: 'cb-small cb-muted' }, details.join(' · ')),
+      ),
+      paused
+        ? h(
+            'div',
+            { class: 'cb-release__actions' },
+            h(
+              'button',
+              {
+                type: 'button',
+                class: 'cb-btn cb-btn--primary cb-btn--sm',
+                dataset: { focusKey: 'primary' },
+                'aria-busy': busy ? 'true' : undefined,
+                on: {
+                  click: () => {
+                    if (busy) return;
+                    const button = findWantlistButton();
+                    if (!button) return;
+                    this.setView({ name: 'adding' });
+                    button.click();
+                    void waitFor(() => readWantlistState() === 'in-wantlist', 8_000).then(() => {
+                      this.lastState = readWantlistState();
+                      this.setView(this.viewFor(this.lastState, false));
+                    });
+                  },
+                },
+              },
+              busy ? t('releaseAdding') : t('alertPutBack'),
+            ),
+            deleteButton,
+          )
+        : h('div', { class: 'cb-release__actions' }, deleteButton),
+      this.emailOff && !paused ? this.emailNotice() : null,
+      h(
+        'div',
+        { class: 'cb-release__footer' },
+        h('span', { class: 'cb-brand' }, t('appName')),
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'cb-link',
+            dataset: { focusKey: 'set-anyway' },
+            on: {
+              click: () => {
+                this.setAnyway = true;
+                this.render();
+              },
+            },
+          },
+          t('alertSetAnother'),
+        ),
+      ),
+    );
+  }
+
+  private emailNotice(): HTMLElement {
+    return h(
+      'div',
+      { class: 'cb-notice', role: 'note' },
+      icon('mail'),
+      h(
+        'span',
+        null,
+        `${t('emailOffShort')} `,
+        h(
+          'a',
+          { class: 'cb-link', href: notificationSettingsUrl(), target: '_blank', rel: 'noopener' },
+          t('emailOffFix'),
+        ),
+      ),
+    );
+  }
+
   private draw(): void {
     const v = this.view;
+    const alert = this.alerts[0];
+    if (alert && !this.setAnyway && v.name !== 'logged-out' && v.name !== 'opening') {
+      this.drawAlertStatus(alert);
+      return;
+    }
     if (v.name === 'logged-out') {
       replaceChildren(
         this.root,
@@ -222,23 +373,7 @@ class ReleaseCard {
             h('span', null, t('releaseAddFailed')),
           )
         : null,
-      this.emailOff
-        ? h(
-            'div',
-            { class: 'cb-notice', role: 'note' },
-            icon('mail'),
-            h(
-              'span',
-              null,
-              `${t('emailOffShort')} `,
-              h(
-                'a',
-                { class: 'cb-link', href: notificationSettingsUrl(), target: '_blank', rel: 'noopener' },
-                t('emailOffFix'),
-              ),
-            ),
-          )
-        : null,
+      this.emailOff ? this.emailNotice() : null,
       this.footer(),
     );
   }

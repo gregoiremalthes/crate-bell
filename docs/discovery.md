@@ -35,6 +35,15 @@ Observed on the live site on 2026-11-24, logged in, English UI. When something h
 - Error screen: `h1` "Put on a record; we'll be right back." (seen briefly during discovery).
 - Setting the name through the native value setter plus an `input` event, and clicking the radio, are picked up by React (verified live).
 
+- Saved searches menu: `select[data-test="saved-searches"]` labelled by `p#saved-searches` ("9 Saved Searches"). The label count equals the number of entries once loaded.
+- Picking a saved search applies its filters to the address (`?release=…&…`) and shows "Update Search", "Save As New", "Delete". Delete shows an inline box "Are you sure you want to delete this saved search?" with Cancel and Delete; confirming removes the entry from the menu.
+
+## Wantlist page `/mywantlist`
+
+- Server-rendered, 25 per page by default, full page loads between pages.
+- Layouts, remembered per account by Discogs (`?layout=med|sm|big`): "Text With Covers" (`med`, default) and "Text Only" (`sm`) are a table with rows `tr.wantlist_r{releaseId}`, a checkbox `input[name="cw_releases"][value={id}]`, and `td.artist_title` holding `.release_title a[href*="/artist/"]` and `.release_title_link a` (title). The large cards layout (`big`) is `ul#wantlist > li.card[data-object-type="release"][data-object-id]` with `a.search_result_title` and `.card-artist-name a`.
+- The artist/title cell is clickable (`data-followable`): it opens the record.
+
 ## Notification settings `/settings/notifications`
 
 - Server-rendered form (`POST /settings/notifications`), readable with a same-origin `fetch`.
