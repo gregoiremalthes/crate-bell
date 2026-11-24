@@ -60,7 +60,7 @@ The number of clicks is not the main problem. Understanding is: people do not kn
 
 **US8: wantlist page.** In table layouts (with covers, text only) the button sits in the Artist - Title cell; in the large cards layout, at the bottom of each card. Clicks never reach Discogs' row (which opens the record). Known alerts show an "Alert on" tag instead.
 
-**US6: preferences.** Frequency (default realtime), minimum record and sleeve condition, hide generic sleeves, seller rating, ships from (with a European Union shortcut). Saved locally, applied to every alert URL.
+**US6: preferences.** Each main part (record pages, wantlist page, album pages, alert page guide) can be switched off; links to Saved Searches and the wantlist sit next to the preferences. Frequency (default realtime), minimum record and sleeve condition, hide generic sleeves, seller rating, ships from (with a European Union shortcut). Saved locally, applied to every alert URL.
 
 ## Non-goals (v1)
 

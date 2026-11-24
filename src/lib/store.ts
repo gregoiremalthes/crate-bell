@@ -6,7 +6,22 @@ import { type AlertFilters, NO_FILTERS } from './discogs/urls';
 
 export type Frequency = 'realtime' | 'digest';
 
+/** Parts of Crate Bell the user can switch off. */
+export interface Features {
+  /** Button and alert status on record pages. */
+  release: boolean;
+  /** "Any pressing" card on album (master) pages. */
+  master: boolean;
+  /** "Set alert" buttons and "Alert on" tags on the wantlist page. */
+  wantlist: boolean;
+  /** Guide panel on Discogs' "Items I Want" page. */
+  guide: boolean;
+}
+
+export const DEFAULT_FEATURES: Features = { release: true, master: true, wantlist: true, guide: true };
+
 export interface Prefs extends AlertFilters {
+  features: Features;
   /** How Discogs should email: as soon as a copy is listed, or once a day. */
   frequency: Frequency;
   /** Formats picked last time on a master page. */
@@ -17,6 +32,7 @@ export const DEFAULT_PREFS: Prefs = {
   ...NO_FILTERS,
   frequency: 'realtime',
   masterFormats: [],
+  features: DEFAULT_FEATURES,
 };
 
 export const prefsItem = storage.defineItem<Prefs>('local:prefs', {
@@ -26,7 +42,8 @@ export const prefsItem = storage.defineItem<Prefs>('local:prefs', {
 
 export async function getPrefs(): Promise<Prefs> {
   // Merge so that preferences added in later versions get their default value.
-  return { ...DEFAULT_PREFS, ...(await prefsItem.getValue()) };
+  const saved = await prefsItem.getValue();
+  return { ...DEFAULT_PREFS, ...saved, features: { ...DEFAULT_FEATURES, ...saved?.features } };
 }
 
 export async function updatePrefs(patch: Partial<Prefs>): Promise<Prefs> {

@@ -133,7 +133,7 @@
   "how1Title": "Click the pink button",
   "how1Text": "On any record page, under Discogs' own buttons. If the record is not in your wantlist yet, Crate Bell adds it first.",
   "mockAlertPage": "Items I Want",
-  "mockFilterChip": "Release: Seiji5",
+  "mockFilterChip": "Release: Homework",
   "mockSaveSearch": "Save Search",
   "how2Title": "Click Save Search",
   "how2Text": "Discogs' alert page opens with your record and your usual filters already selected. A pink ring shows where to click.",
@@ -207,5 +207,17 @@
   "coachDeleteMissingText": "\"$1\" is not in your Saved Searches any more. It was probably deleted already, so Crate Bell forgot it too.",
   "wantlistSetAlert": "Set alert",
   "wantlistSetAlertFor": "Set a sale alert for $1",
-  "wantlistAlertOn": "Alert on"
+  "wantlistAlertOn": "Alert on",
+  "linkSavedSearches": "My saved alerts on Discogs",
+  "linkWantlist": "My wantlist on Discogs",
+  "featuresTitle": "What Crate Bell shows on Discogs",
+  "featureRelease": "Record pages",
+  "featureReleaseText": "The pink button, or the \"Sale alert on\" status.",
+  "featureWantlist": "Wantlist page",
+  "featureWantlistText": "A \"Set alert\" button or an \"Alert on\" tag on every record.",
+  "featureMaster": "Album pages",
+  "featureMasterText": "The \"Want any pressing of this album?\" card.",
+  "featureGuide": "Alert page guide",
+  "featureGuideText": "The step-by-step panel on Discogs' Items I Want page.",
+  "featuresNote": "Changes apply the next time you open or reload a Discogs page."
 }

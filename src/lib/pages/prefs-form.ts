@@ -136,7 +136,31 @@ export async function mountFullPrefs(container: HTMLElement): Promise<void> {
     void save({ shipsFrom: [...countries] });
   };
 
+  const toggle = (key: keyof Prefs['features'], label: string, help: string) =>
+    h(
+      'label',
+      { class: 'cb-choice cb-choice--soft' },
+      h('input', {
+        type: 'checkbox',
+        checked: prefs.features[key],
+        on: {
+          change: (e) => save({ features: { ...prefs.features, [key]: (e.target as HTMLInputElement).checked } }),
+        },
+      }),
+      h('span', null, h('span', { class: 'cb-choice__title' }, label), h('span', { class: 'cb-choice__text' }, help)),
+    );
+
   container.append(
+    h(
+      'fieldset',
+      { class: 'cb-choices', id: 'features' },
+      h('legend', null, t('featuresTitle')),
+      toggle('release', t('featureRelease'), t('featureReleaseText')),
+      toggle('wantlist', t('featureWantlist'), t('featureWantlistText')),
+      toggle('master', t('featureMaster'), t('featureMasterText')),
+      toggle('guide', t('featureGuide'), t('featureGuideText')),
+      h('p', { class: 'cb-small cb-muted' }, t('featuresNote')),
+    ),
     frequencyFieldset(prefs, save),
     conditionSelect('pref-media', t('prefsMedia'), prefs.minMediaCondition, (v) => save({ minMediaCondition: v })),
     conditionSelect('pref-sleeve', t('prefsSleeve'), prefs.minSleeveCondition, (v) => save({ minSleeveCondition: v })),

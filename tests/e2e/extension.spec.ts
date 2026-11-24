@@ -221,3 +221,18 @@ test('wantlist page, large cards layout', async ({ page }) => {
     page.locator('li.card crate-bell-row').getByRole('button', { name: 'Set a sale alert for Seiji5' }),
   ).toBeVisible();
 });
+
+test('features can be switched off from the guide page', async ({ page, extensionId }) => {
+  await page.goto(`chrome-extension://${extensionId}/options.html#preferences`);
+  await expect(page.getByRole('link', { name: 'My wantlist on Discogs' })).toHaveAttribute(
+    'href',
+    'https://www.discogs.com/mywantlist',
+  );
+  await page.getByLabel('Wantlist page').uncheck();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  await page.goto('https://www.discogs.com/mywantlist');
+  await page.waitForTimeout(800);
+  await expect(page.locator('crate-bell-row')).toHaveCount(0);
+  await page.goto('https://www.discogs.com/release/3235-Daft-Punk-Homework');
+  await expect(card(page).getByRole('button', { name: "Alert me when it's for sale" })).toBeVisible();
+});

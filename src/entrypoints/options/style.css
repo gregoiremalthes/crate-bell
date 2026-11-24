@@ -340,3 +340,9 @@ details p {
   text-align: center;
   color: var(--ink-muted);
 }
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}

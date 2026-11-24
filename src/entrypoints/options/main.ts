@@ -25,6 +25,8 @@ link('issues', ISSUES_URL);
 link('privacy', PRIVACY_URL);
 link('source', REPO_URL);
 link('open-wantlister', wantlisterHomeUrl());
+link('link-saved', wantlisterHomeUrl());
+link('link-wantlist', 'https://www.discogs.com/mywantlist');
 
 mountEmailStatus($('email-status'));
 void mountFullPrefs($('prefs'));

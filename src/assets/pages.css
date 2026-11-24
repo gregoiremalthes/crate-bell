@@ -111,6 +111,10 @@ a:focus-visible {
   background: var(--pink);
   border-color: var(--on-pink);
 }
+.cb-choice--soft:has(input:checked) {
+  background: var(--pink-soft);
+  border-color: var(--line);
+}
 .cb-choice input {
   width: 20px;
   height: 20px;

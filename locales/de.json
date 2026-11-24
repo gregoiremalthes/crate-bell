@@ -133,7 +133,7 @@
   "how1Title": "Den rosa Knopf klicken",
   "how1Text": "Auf jeder Plattenseite, unter den Knöpfen von Discogs. Ist die Platte noch nicht auf Ihrer Wantlist, fügt Crate Bell sie zuerst hinzu.",
   "mockAlertPage": "Items I Want",
-  "mockFilterChip": "Release: Seiji5",
+  "mockFilterChip": "Release: Homework",
   "mockSaveSearch": "Save Search",
   "how2Title": "Auf Save Search klicken",
   "how2Text": "Die Alarmseite von Discogs öffnet sich mit Ihrer Platte und Ihren üblichen Filtern. Ein rosa Ring zeigt, wo Sie klicken.",
@@ -207,5 +207,17 @@
   "coachDeleteMissingText": "„$1“ steht nicht mehr in Ihren Saved Searches. Er wurde wohl schon gelöscht, Crate Bell vergisst ihn auch.",
   "wantlistSetAlert": "Alarm einrichten",
   "wantlistSetAlertFor": "Verkaufsalarm für $1 einrichten",
-  "wantlistAlertOn": "Alarm aktiv"
+  "wantlistAlertOn": "Alarm aktiv",
+  "linkSavedSearches": "Meine gespeicherten Alarme auf Discogs",
+  "linkWantlist": "Meine Wantlist auf Discogs",
+  "featuresTitle": "Was Crate Bell auf Discogs anzeigt",
+  "featureRelease": "Plattenseiten",
+  "featureReleaseText": "Den rosa Knopf oder den Status „Verkaufsalarm aktiv“.",
+  "featureWantlist": "Wantlist-Seite",
+  "featureWantlistText": "Einen Knopf „Alarm einrichten“ oder ein Etikett „Alarm aktiv“ bei jeder Platte.",
+  "featureMaster": "Albumseiten",
+  "featureMasterText": "Die Karte „Ist Ihnen jede Pressung recht?“.",
+  "featureGuide": "Anleitung auf der Alarmseite",
+  "featureGuideText": "Das Schritt-für-Schritt-Feld auf der Discogs-Seite Items I Want.",
+  "featuresNote": "Änderungen gelten, sobald Sie eine Discogs-Seite öffnen oder neu laden."
 }

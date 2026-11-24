@@ -133,7 +133,7 @@
   "how1Title": "Cliquez sur le bouton rose",
   "how1Text": "Sur chaque page de disque, sous les boutons de Discogs. Si le disque n'est pas encore dans votre wantlist, Crate Bell l'y ajoute d'abord.",
   "mockAlertPage": "Items I Want",
-  "mockFilterChip": "Release: Seiji5",
+  "mockFilterChip": "Release: Homework",
   "mockSaveSearch": "Save Search",
   "how2Title": "Cliquez sur Save Search",
   "how2Text": "La page d'alerte de Discogs s'ouvre avec votre disque et vos filtres habituels déjà sélectionnés. Un cercle rose montre où cliquer.",
@@ -207,5 +207,17 @@
   "coachDeleteMissingText": "« $1 » n'est plus dans vos Saved Searches. Elle a sans doute déjà été supprimée : Crate Bell l'oublie aussi.",
   "wantlistSetAlert": "Créer une alerte",
   "wantlistSetAlertFor": "Créer une alerte de vente pour $1",
-  "wantlistAlertOn": "Alerte active"
+  "wantlistAlertOn": "Alerte active",
+  "linkSavedSearches": "Mes alertes enregistrées sur Discogs",
+  "linkWantlist": "Ma wantlist sur Discogs",
+  "featuresTitle": "Ce que Crate Bell affiche sur Discogs",
+  "featureRelease": "Pages de disque",
+  "featureReleaseText": "Le bouton rose, ou l'état « Alerte de vente active ».",
+  "featureWantlist": "Page wantlist",
+  "featureWantlistText": "Un bouton « Créer une alerte » ou une étiquette « Alerte active » sur chaque disque.",
+  "featureMaster": "Pages d'album",
+  "featureMasterText": "La carte « N'importe quel pressage vous convient ? ».",
+  "featureGuide": "Guide de la page d'alerte",
+  "featureGuideText": "Le panneau pas à pas sur la page Items I Want de Discogs.",
+  "featuresNote": "Les changements s'appliquent à la prochaine ouverture ou au prochain rechargement d'une page Discogs."
 }

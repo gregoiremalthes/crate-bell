@@ -1,7 +1,12 @@
 # Changelog
 
-## 1.1.0 (unreleased)
+## 1.2.0 (unreleased)
 
+- Switches on the guide page to turn off record page buttons, wantlist buttons, album cards or the alert page guide.
+- Links to your saved alerts and your wantlist on Discogs from the guide page.
+- Guide drawings use Daft Punk - Homework as the example record.
+
+## 1.1.0 (unreleased)
 
 - "Sale alert on" status on record pages once an alert exists (paused when the record left the wantlist), with guided deletion.
 - "Set alert" button and "Alert on" tag on every record of the wantlist page.

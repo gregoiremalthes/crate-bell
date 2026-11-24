@@ -8,6 +8,7 @@ import { initReleasePage } from '@/lib/features/release';
 import { initSettingsPage } from '@/lib/features/settings';
 import { initWantlistPage } from '@/lib/features/wantlist';
 import { initWantlisterPage } from '@/lib/features/wantlister';
+import { getPrefs } from '@/lib/store';
 import { injectFontFaces } from '@/lib/ui/content-ui';
 
 /**
@@ -31,7 +32,9 @@ export default defineContentScript({
     };
     ctx.addEventListener(window, 'wxt:locationchange', ({ newUrl }) => {
       if (parseDiscogsPage(newUrl.pathname).kind === 'wantlister') {
-        void startCoach();
+        void getPrefs().then(({ features }) => {
+          if (features.guide) void startCoach();
+        });
       } else if (coach) {
         coach.remove();
         coach = null;
@@ -40,6 +43,7 @@ export default defineContentScript({
 
     const page = parseDiscogsPage(window.location.pathname);
     if (page.kind === 'other') return;
+    const { features } = await getPrefs();
 
     injectFontFaces();
     // Keep the "are sale alert emails on?" answer fresh (at most every few hours).
@@ -47,15 +51,15 @@ export default defineContentScript({
 
     switch (page.kind) {
       case 'release':
-        return initReleasePage(ctx, page.id);
+        return features.release ? initReleasePage(ctx, page.id) : undefined;
       case 'master':
-        return initMasterPage(ctx, page.id);
+        return features.master ? initMasterPage(ctx, page.id) : undefined;
       case 'wantlister':
-        return startCoach();
+        return features.guide ? startCoach() : undefined;
       case 'notification-settings':
         return initSettingsPage(ctx);
       case 'wantlist':
-        return initWantlistPage(ctx);
+        return features.wantlist ? initWantlistPage(ctx) : undefined;
     }
   },
 });
