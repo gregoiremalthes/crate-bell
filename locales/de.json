@@ -175,5 +175,12 @@
   "privacyLink": "Datenschutz",
   "sourceLink": "Quellcode",
   "settingsHintOn": "Crate Bell: Das ist die Einstellung, die Alarme brauchen. Sie ist eingeschaltet.",
-  "settingsHintOff": "Crate Bell: Setzen Sie in dieser Zeile den Haken bei Personal Email und speichern Sie unten auf der Seite."
+  "settingsHintOff": "Crate Bell: Setzen Sie in dieser Zeile den Haken bei Personal Email und speichern Sie unten auf der Seite.",
+  "lang": "de",
+  "navLabel": "Abschnitte",
+  "masterSetAlertOne": "Alarm für diese Pressung einrichten",
+  "coachSaveTextMasterOne": "Links ist 1 Pressung ausgewählt. Passen Sie die Filter an, wenn Sie möchten, und öffnen Sie dann das Speicherformular.",
+  "coachDrawerTextKept": "Prüfen Sie den Namen und wählen Sie, wenn Sie möchten, $1. Klicken Sie dann unten im Formular auf Save Search.",
+  "coachCheckingTitle": "Abgleich mit Discogs…",
+  "coachCheckingText": "Crate Bell sucht Ihren neuen Alarm in der Liste Saved Searches."
 }

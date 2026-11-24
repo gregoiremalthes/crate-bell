@@ -47,16 +47,21 @@ describe('checkEmailSetting', () => {
 describe('refreshEmailStatusIfStale', () => {
   beforeEach(() => fakeBrowser.reset());
 
-  it('trusts a recent on/off answer, but re-checks a "logged-out" one', async () => {
+  it('trusts a recent on/off answer for hours, retries an unsure one after half an hour', async () => {
     const { refreshEmailStatusIfStale } = await import('@/lib/email-status');
-    await emailStatusItem.setValue({ state: 'on', checkedAt: Date.now() });
-    const spy = vi.spyOn(globalThis, 'fetch');
+    const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(settingsHtml));
+
+    await emailStatusItem.setValue({ state: 'on', checkedAt: Date.now() - 60 * 60 * 1000 });
     expect((await refreshEmailStatusIfStale())?.state).toBe('on');
     expect(spy).not.toHaveBeenCalled();
 
-    await emailStatusItem.setValue({ state: 'logged-out', checkedAt: Date.now() });
-    spy.mockResolvedValue(new Response(settingsHtml));
+    await emailStatusItem.setValue({ state: 'logged-out', checkedAt: Date.now(), attemptedAt: Date.now() });
     await refreshEmailStatusIfStale();
+    expect(spy).not.toHaveBeenCalled();
+
+    const longAgo = Date.now() - 31 * 60 * 1000;
+    await emailStatusItem.setValue({ state: 'logged-out', checkedAt: longAgo, attemptedAt: longAgo });
+    expect((await refreshEmailStatusIfStale())?.state).toBe('on');
     expect(spy).toHaveBeenCalledTimes(1);
   });
 });

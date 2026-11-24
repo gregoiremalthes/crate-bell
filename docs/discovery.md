@@ -42,5 +42,9 @@ Observed on the live site on 2026-11-24, logged in, English UI. When something h
 
 ## Open questions
 
+- Whether the "Items I Want" app is translated on /de/, /fr/… paths. Default-name detection ("My Saved Search N"), the error texts and the "right back" screen are matched in English only. If the page is translated, Crate Bell keeps the user's name, says so, and only the error explanations are lost.
+- The real delay between "Save Search" and the refreshed Saved Searches list. The guide shows "Checking with Discogs…" for 2.5 s and keeps looking for 8 s.
+- Whether Discogs' pages are restored from the back/forward cache (the record card resets on `pageshow` either way).
+
 - Logged-out markup of the release page header (assumed: a `/login` link in `header`).
 - Whether a saved search disappears when its only release leaves the wantlist. Observed: a saved search whose release is not listed still loads with its chip, so it most likely stays. The guide says so.

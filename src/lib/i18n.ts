@@ -25,6 +25,6 @@ export function translatePage(root: ParentNode = document): void {
   for (const el of root.querySelectorAll<HTMLElement>('[data-i18n-aria-label]')) {
     el.setAttribute('aria-label', t((el.dataset.i18nAriaLabel ?? '') as MessageKey));
   }
-  const lang = browser.i18n.getUILanguage?.() ?? 'en';
-  document.documentElement.lang = lang.split('-')[0] ?? 'en';
+  // The language of the text actually shown (a Spanish browser gets the English text, lang "en").
+  document.documentElement.lang = t('lang');
 }

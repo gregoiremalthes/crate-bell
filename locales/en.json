@@ -175,5 +175,12 @@
   "privacyLink": "Privacy",
   "sourceLink": "Source code",
   "settingsHintOn": "Crate Bell: this is the setting sale alerts need. It is on.",
-  "settingsHintOff": "Crate Bell: tick Personal Email on this line, then save at the bottom of the page."
+  "settingsHintOff": "Crate Bell: tick Personal Email on this line, then save at the bottom of the page.",
+  "lang": "en",
+  "navLabel": "Sections",
+  "masterSetAlertOne": "Set the alert for this pressing",
+  "coachSaveTextMasterOne": "1 pressing is selected on the left. Change the filters if you like, then open the save form.",
+  "coachDrawerTextKept": "Check the name, and choose $1 if you like. Then click Save Search at the bottom of the form.",
+  "coachCheckingTitle": "Checking with Discogs…",
+  "coachCheckingText": "Crate Bell is looking for your new alert in the Saved Searches list."
 }

@@ -33,9 +33,10 @@ Each phase ends with something you can check. Status as of 2026-11-24.
 
 ## Phase 5. Quality (done, keep doing)
 
-- 65 unit tests (selectors on fixtures, URLs, limits, names, storage, email check, translations including house style).
-- 9 end-to-end tests: built extension in Chromium, Discogs pages served from fixtures with a small simulator of Discogs' scripts.
+- 68 unit tests (selectors on fixtures, URLs, limits, names, storage, email check, translations including house style).
+- 11 end-to-end tests: built extension in Chromium, Discogs pages served from fixtures with a small simulator of Discogs' scripts.
 - Live probe on discogs.com: detection, anchor and form pre-fill verified on the real pages (nothing saved).
+- Independent review by a separate agent: 13 findings, all fixed (false success after Cancel, late list refresh, focus loss, unconfirmed wantlist add, Back button state, per-tab pending alerts, email check timing, plurals, contrast).
 - Accessibility: 48px targets, visible focus rings, `role=status/alert` on changing messages, reduced motion respected, text contrast from Highlighter tokens (black on pink 10.5:1).
 
 ## Phase 6. Your test drive (next: you)

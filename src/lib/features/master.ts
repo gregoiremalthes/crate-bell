@@ -13,9 +13,9 @@ import {
 import { findMasterAddAllButton, findMasterAnchor, isLoggedOut, readRecordInfo, SEL } from '../discogs/selectors';
 import { buildWantlisterUrl, countFilterFacets, loginUrl } from '../discogs/urls';
 import { t } from '../i18n';
-import { getPrefs, type Prefs, pendingAlertItem, updatePrefs } from '../store';
+import { getPrefs, type Prefs, savePendingAlert, updatePrefs } from '../store';
 import { icon, openGuide, Spotlight } from '../ui/content-ui';
-import { h, replaceChildren, waitFor } from '../ui/dom';
+import { h, renderKeepingFocus, replaceChildren, waitFor } from '../ui/dom';
 import { keepMounted } from './mount';
 
 /** "Want any pressing of this album?" card on master release pages. */
@@ -111,7 +111,7 @@ class MasterCard {
     const info = readRecordInfo('master');
     const { url, releaseIds, truncated } = buildWantlisterUrl(ids, this.prefs);
     const formats = this.selected.join(' / ');
-    await pendingAlertItem.setValue({
+    await savePendingAlert({
       kind: 'master',
       releaseIds,
       name: buildAlertName(info.artists, info.title, t('masterAlertSuffix', formats)),
@@ -123,6 +123,10 @@ class MasterCard {
   }
 
   private render(): void {
+    renderKeepingFocus(this.root, () => this.draw());
+  }
+
+  private draw(): void {
     const head = h(
       'div',
       { class: 'cb-card__head' },
@@ -184,6 +188,7 @@ class MasterCard {
             type: 'button',
             class: 'cb-chip',
             'aria-pressed': this.selected.includes(g.format) ? 'true' : 'false',
+            dataset: { focusKey: `chip-${g.format}` },
             on: { click: () => this.toggle(g.format) },
           },
           icon('check'),
@@ -206,7 +211,12 @@ class MasterCard {
           h('p', { class: 'cb-step__text' }, t('masterStep1Text')),
           h(
             'button',
-            { type: 'button', class: 'cb-btn cb-btn--secondary cb-btn--sm', on: { click: () => this.showWhere() } },
+            {
+              type: 'button',
+              class: 'cb-btn cb-btn--secondary cb-btn--sm',
+              dataset: { focusKey: 'where' },
+              on: { click: () => this.showWhere() },
+            },
             t('masterShowWhere'),
           ),
         ),
@@ -226,10 +236,19 @@ class MasterCard {
               type: 'button',
               class: 'cb-btn cb-btn--primary cb-btn--block',
               'aria-disabled': ids.length ? undefined : 'true',
-              on: { click: () => void this.setAlert(ids) },
+              dataset: { focusKey: 'set-alert' },
+              on: {
+                click: () => {
+                  if (ids.length) void this.setAlert(ids);
+                },
+              },
             },
             icon('bell'),
-            ids.length ? t('masterSetAlert', String(Math.min(ids.length, room))) : t('masterPickFormat'),
+            ids.length === 0
+              ? t('masterPickFormat')
+              : ids.length === 1
+                ? t('masterSetAlertOne')
+                : t('masterSetAlert', String(Math.min(ids.length, room))),
           ),
         ),
       ),

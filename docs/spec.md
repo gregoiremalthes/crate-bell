@@ -31,14 +31,16 @@ The number of clicks is not the main problem. Understanding is: people do not kn
 **US1: set an alert from a record page.**
 
 - Given a release in my wantlist, when I click "Set a sale alert", then `https://www.discogs.com/shop/mywants/?release=<id>` opens, plus my usual filters.
-- Given a release not in my wantlist, when I click "Alert me when it's for sale", then Discogs' own wantlist button is clicked, and once Discogs shows it in the wantlist (8 s timeout) the alert page opens. On timeout, an error says to check I am logged in.
+- Given a release not in my wantlist, when I click "Alert me when it's for sale", then Discogs' own wantlist button is clicked; once Discogs shows it in the wantlist (8 s timeout) and it is still there 1.2 s later (Discogs updates before its server confirms), the alert page opens. Otherwise an error says to check I am logged in.
+- Keyboard focus stays on the control the user pressed when the card re-renders.
 - The card appears right after the block holding Discogs' wantlist button; if that block is not found, after "Statistics"; if nothing is found, as a floating card.
 
 **US2: finish on Discogs' alert page.**
 
 - Arriving from US1 within 10 minutes with the same release filters, the guide shows "Almost there" and rings "Save Search".
 - When Discogs' save form opens, the name is replaced only if it is Discogs' default ("My Saved Search N"), made unique against my saved alerts, and the frequency radio matches my preference.
-- When the form closes and the new name appears in "Saved Searches", the guide says the alert is set. Cancelling brings back step 1.
+- When the form closes, the guide shows "Checking with Discogs…" and looks for a saved alert that did not exist before the form opened (preferring the name in the form). Found: "Your sale alert is set". Not found after 2.5 s (for example after Cancel): back to step 1, while still accepting a late refresh for 8 s.
+- Several tabs can each prepare an alert: pending alerts are stored per set of releases and expire after 10 minutes.
 - Discogs errors (30 daily digests, 100 filters, 300 saved searches, name too long, name taken) are explained.
 - If Discogs' page fails ("Put on a record; we'll be right back."), the guide says so and offers to reload.
 

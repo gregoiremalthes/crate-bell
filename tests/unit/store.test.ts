@@ -49,3 +49,38 @@ describe('pending alert handoff', () => {
     expect(pendingMatchesPage(pending, [])).toBe(false);
   });
 });
+
+describe('pending alerts per record', () => {
+  beforeEach(() => fakeBrowser.reset());
+
+  it('keeps one pending alert per set of releases, and clears only its own', async () => {
+    const { savePendingAlert, findPendingAlert, clearPendingAlert } = await import('@/lib/store');
+    const a: PendingAlert = {
+      kind: 'release',
+      releaseIds: [1],
+      name: 'A',
+      frequency: 'realtime',
+      createdAt: Date.now(),
+    };
+    const b: PendingAlert = {
+      kind: 'master',
+      releaseIds: [3, 2],
+      name: 'B',
+      frequency: 'digest',
+      createdAt: Date.now(),
+    };
+    await savePendingAlert(a);
+    await savePendingAlert(b);
+    expect((await findPendingAlert([1]))?.name).toBe('A');
+    expect((await findPendingAlert([2, 3]))?.name).toBe('B');
+    await clearPendingAlert([1]);
+    expect(await findPendingAlert([1])).toBeNull();
+    expect((await findPendingAlert([3, 2]))?.name).toBe('B');
+  });
+
+  it('ignores expired ones', async () => {
+    const { savePendingAlert, findPendingAlert } = await import('@/lib/store');
+    await savePendingAlert({ kind: 'release', releaseIds: [9], name: 'old', frequency: 'realtime', createdAt: 0 });
+    expect(await findPendingAlert([9])).toBeNull();
+  });
+});

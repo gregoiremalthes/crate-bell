@@ -102,3 +102,17 @@ export function onDomChange(fn: () => void, target: Node = document.body): () =>
 
 export const prefersReducedMotion = (): boolean =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * Re-renders `container` and puts keyboard focus back on the control that had it
+ * (matched by its data-focus-key), so keyboard and screen reader users never lose their place.
+ */
+export function renderKeepingFocus(container: Element, render: () => void): void {
+  const root = container.getRootNode() as Document | ShadowRoot;
+  const active = root.activeElement as HTMLElement | null;
+  const key = active && container.contains(active) ? active.dataset.focusKey : undefined;
+  render();
+  if (key) container.querySelector<HTMLElement>(`[data-focus-key="${CSS.escape(key)}"]`)?.focus();
+}
+
+export const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));

@@ -11,9 +11,9 @@ import {
 } from '../discogs/selectors';
 import { buildWantlisterUrl, loginUrl, notificationSettingsUrl } from '../discogs/urls';
 import { t } from '../i18n';
-import { emailStatusItem, getPrefs, pendingAlertItem } from '../store';
+import { emailStatusItem, getPrefs, savePendingAlert } from '../store';
 import { icon, openGuide } from '../ui/content-ui';
-import { h, onDomChange, replaceChildren, waitFor } from '../ui/dom';
+import { h, onDomChange, renderKeepingFocus, replaceChildren, sleep, waitFor } from '../ui/dom';
 import { keepMounted } from './mount';
 
 type View =
@@ -26,7 +26,9 @@ type View =
 
 /** The pink button under Discogs' "Add to Wantlist" button on every release page. */
 export async function initReleasePage(ctx: ContentScriptContext, releaseId: number): Promise<void> {
-  const anchor = await waitFor(() => findReleaseAnchor(), 15_000);
+  // Discogs' buttons appear after the page hydrates: wait for them before using a fallback place.
+  await waitFor(() => findWantlistButton(), 8_000);
+  const anchor = await waitFor(() => findReleaseAnchor(), 7_000);
   const floating = !anchor;
 
   const ui = await createShadowRootUi(ctx, {
@@ -38,7 +40,7 @@ export async function initReleasePage(ctx: ContentScriptContext, releaseId: numb
     onMount: (container) => new ReleaseCard(container, releaseId, floating),
     onRemove: (card) => card?.destroy(),
   });
-  keepMounted(ctx, ui, () => (floating ? document.body : findReleaseAnchor()));
+  keepMounted(ctx, ui, () => (floating ? document.body : findReleaseAnchor()), floating ? 'last' : 'after');
 }
 
 class ReleaseCard {
@@ -73,6 +75,18 @@ class ReleaseCard {
       previousStop();
       unwatchEmail();
     };
+    // Coming back with the browser's Back button can restore the page as it was ("Opening…").
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      this.lastState = readWantlistState();
+      this.setView(this.viewFor(this.lastState, false));
+    };
+    window.addEventListener('pageshow', onPageShow);
+    const stopBeforePageShow = this.stopWatching;
+    this.stopWatching = () => {
+      stopBeforePageShow();
+      window.removeEventListener('pageshow', onPageShow);
+    };
     void emailStatusItem.getValue().then((status) => {
       this.emailOff = status?.state === 'off';
       this.render();
@@ -106,8 +120,13 @@ class ReleaseCard {
       this.setView({ name: 'adding' });
       button.click();
       const added = await waitFor(() => readWantlistState() === 'in-wantlist', 8_000);
+      // Discogs updates its button before its server confirms: give it a moment to undo a failure.
+      if (added) await sleep(1_200);
       this.lastState = readWantlistState();
-      if (!added) return this.setView({ name: 'add-failed' });
+      if (this.lastState !== 'in-wantlist') {
+        this.setView({ name: 'add-failed' });
+        return;
+      }
     }
     await this.openAlertPage();
   }
@@ -117,7 +136,7 @@ class ReleaseCard {
     const prefs = await getPrefs();
     const info = readRecordInfo('release');
     const { url, releaseIds } = buildWantlisterUrl([this.releaseId], prefs);
-    await pendingAlertItem.setValue({
+    await savePendingAlert({
       kind: 'release',
       releaseIds,
       name: buildAlertName(info.artists, info.title),
@@ -133,6 +152,10 @@ class ReleaseCard {
   }
 
   private render(): void {
+    renderKeepingFocus(this.root, () => this.draw());
+  }
+
+  private draw(): void {
     const v = this.view;
     if (v.name === 'logged-out') {
       replaceChildren(
@@ -172,6 +195,7 @@ class ReleaseCard {
       {
         type: 'button',
         class: `cb-btn cb-btn--primary cb-btn--block${v.name === 'set' && v.justAdded ? ' cb-nudge' : ''}`,
+        dataset: { focusKey: 'primary' },
         'aria-disabled': busy ? 'true' : undefined,
         'aria-busy': busy ? 'true' : undefined,
         on: {
@@ -224,7 +248,11 @@ class ReleaseCard {
       'div',
       { class: 'cb-release__footer' },
       h('span', { class: 'cb-brand' }, t('appName')),
-      h('button', { type: 'button', class: 'cb-link', on: { click: () => openGuide('how') } }, t('howItWorks')),
+      h(
+        'button',
+        { type: 'button', class: 'cb-link', dataset: { focusKey: 'how' }, on: { click: () => openGuide('how') } },
+        t('howItWorks'),
+      ),
     );
   }
 }

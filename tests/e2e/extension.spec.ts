@@ -120,3 +120,23 @@ test('preferences are applied to the alert page URL', async ({ page, extensionId
   expect(params.getAll('mediaCondition')).toEqual(['Mint (M)', 'Near Mint (NM or M-)']);
   expect(params.getAll('shipsFrom')).toEqual(['Germany']);
 });
+
+test('typing an existing name, then cancelling, never claims the alert is set', async ({ page }) => {
+  await page.goto('https://www.discogs.com/release/3235-Daft-Punk-Homework');
+  await card(page).getByRole('button', { name: "Alert me when it's for sale" }).click();
+  await page.waitForURL(/\/shop\/mywants\//);
+  await coach(page).getByRole('button', { name: 'Open the save form' }).click();
+  await page.locator('#save-search-name').fill('Seiji - Seiji5');
+  await page.locator('[data-slot="sheet-content"] button', { hasText: 'Cancel' }).click();
+  await expectVisibleText(coach(page), 'Almost there');
+  await expect(coach(page)).not.toContainText('Your sale alert is set');
+});
+
+test('keyboard focus stays on the control the user pressed', async ({ page }) => {
+  await page.goto('https://www.discogs.com/master/26629-Daft-Punk-Homework');
+  const chip = page.locator('crate-bell-master').getByRole('button', { name: 'CD (1)' });
+  await chip.focus();
+  await page.keyboard.press('Enter');
+  await expect(chip).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip).toBeFocused();
+});

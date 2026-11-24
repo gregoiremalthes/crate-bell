@@ -18,19 +18,27 @@ export default defineContentScript({
   runAt: 'document_idle',
   cssInjectionMode: 'ui',
   async main(ctx) {
-    // Discogs' shop is a single-page app: "Items I Want" can be reached without a page load.
-    let coachStarted = false;
+    // Discogs' shop is a single-page app: "Items I Want" can be reached, and left, without a page load.
+    let coach: Awaited<ReturnType<typeof initWantlisterPage>> | null = null;
+    let coachStarting = false;
+    const startCoach = async () => {
+      if (coach || coachStarting) return;
+      coachStarting = true;
+      injectFontFaces();
+      coach = await initWantlisterPage(ctx);
+      coachStarting = false;
+    };
     ctx.addEventListener(window, 'wxt:locationchange', ({ newUrl }) => {
-      if (!coachStarted && parseDiscogsPage(newUrl.pathname).kind === 'wantlister') {
-        coachStarted = true;
-        injectFontFaces();
-        void initWantlisterPage(ctx);
+      if (parseDiscogsPage(newUrl.pathname).kind === 'wantlister') {
+        void startCoach();
+      } else if (coach) {
+        coach.remove();
+        coach = null;
       }
     });
 
     const page = parseDiscogsPage(window.location.pathname);
     if (page.kind === 'other') return;
-    if (page.kind === 'wantlister') coachStarted = true;
 
     injectFontFaces();
     // Keep the "are sale alert emails on?" answer fresh (at most every few hours).
@@ -42,7 +50,7 @@ export default defineContentScript({
       case 'master':
         return initMasterPage(ctx, page.id);
       case 'wantlister':
-        return initWantlisterPage(ctx);
+        return startCoach();
       case 'notification-settings':
         return initSettingsPage(ctx);
     }

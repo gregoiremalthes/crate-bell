@@ -23,7 +23,7 @@
     "zip": "pnpm locales && wxt zip",
     "zip:firefox": "pnpm locales && wxt zip -b firefox",
     "postinstall": "node scripts/build-locales.mjs && wxt prepare",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node scripts/build-locales.mjs && wxt prepare && tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "test": "vitest run",

@@ -1,5 +1,5 @@
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
-import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
+import { createShadowRootUi, type ShadowRootContentScriptUi } from 'wxt/utils/content-script-ui/shadow-root';
 import { makeUnique } from '../alert-name';
 import { MAX_DAILY_DIGEST_ALERTS, MAX_SAVED_ALERTS } from '../discogs/constants';
 import {
@@ -18,12 +18,14 @@ import {
 import { releaseIdsFromSearch } from '../discogs/urls';
 import { type MessageKey, t } from '../i18n';
 import { KOFI_URL } from '../links';
-import { alertsSetItem, isPendingFresh, type PendingAlert, pendingAlertItem, pendingMatchesPage } from '../store';
+import { alertsSetItem, clearPendingAlert, findPendingAlert, type PendingAlert } from '../store';
 import { icon, openGuide, Spotlight } from '../ui/content-ui';
-import { h, onDomChange, replaceChildren } from '../ui/dom';
+import { h, onDomChange, renderKeepingFocus, replaceChildren } from '../ui/dom';
 
 /** How long after the save form closes we keep looking for the new alert in Discogs' list. */
 const SAVE_CONFIRM_WINDOW_MS = 8_000;
+/** How long we show "Checking…" before pointing at Save Search again (after a Cancel, say). */
+const CHECKING_DISPLAY_MS = 2_500;
 
 type Step =
   | { name: 'help-closed' }
@@ -31,6 +33,7 @@ type Step =
   | { name: 'down' }
   | { name: 'save' }
   | { name: 'drawer'; error: DrawerError | null; emailOff: boolean }
+  | { name: 'checking' }
   | { name: 'done'; alertName: string; frequency: PendingAlert['frequency'] };
 
 /**
@@ -38,7 +41,7 @@ type Step =
  * name and email frequency, and confirms when the alert is saved. It never clicks "Save" itself:
  * the user stays in control of their account.
  */
-export async function initWantlisterPage(ctx: ContentScriptContext): Promise<void> {
+export async function initWantlisterPage(ctx: ContentScriptContext): Promise<ShadowRootContentScriptUi<Coach>> {
   const ui = await createShadowRootUi(ctx, {
     name: 'crate-bell-coach',
     position: 'inline',
@@ -49,6 +52,7 @@ export async function initWantlisterPage(ctx: ContentScriptContext): Promise<voi
     onRemove: (coach) => coach?.destroy(),
   });
   ui.mount();
+  return ui;
 }
 
 class Coach {
@@ -57,11 +61,18 @@ class Coach {
   private step: Step = { name: 'help-closed' };
   private pending: PendingAlert | null = null;
   private stop: () => void = () => undefined;
-  private filledDrawer: Element | null = null;
   private dismissed = false;
-  private lastFilledName: string | null = null;
-  private savedCountBefore = 0;
+
+  // Save form bookkeeping
+  private drawer: Element | null = null;
+  private drawerCleanup: () => void = () => undefined;
+  /** Saved alert names before the form opened: a success is a name that was not there. */
+  private namesBefore = new Set<string>();
+  /** The name in the form, as last typed or filled in. */
+  private formName: string | null = null;
+  private nameWasFilled = false;
   private closedAt = 0;
+  private timers: number[] = [];
 
   constructor(container: HTMLElement) {
     this.root = h('div', { class: 'cb-root' });
@@ -72,24 +83,20 @@ class Coach {
 
   destroy(): void {
     this.stop();
+    this.drawerCleanup();
+    this.clearTimers();
     this.spotlight.destroy();
   }
 
   private async start(): Promise<void> {
-    const pending = await pendingAlertItem.getValue();
-    const pageIds = releaseIdsFromSearch(window.location.search);
-    if (isPendingFresh(pending) && pendingMatchesPage(pending, pageIds)) {
-      this.pending = pending;
-      this.step = { name: 'save' };
-    } else if (pending && !isPendingFresh(pending)) {
-      await pendingAlertItem.setValue(null);
-    }
+    this.pending = await findPendingAlert(releaseIdsFromSearch(window.location.search));
+    if (this.pending) this.step = { name: 'save' };
     this.render();
+    if (this.pending) this.focusTitle();
     this.stop = onDomChange(() => this.update());
     this.update();
   }
 
-  /** Re-evaluates where the user is in the flow after every change on the page. */
   private update(): void {
     if (this.dismissed) return;
     this.go(this.nextStep());
@@ -103,73 +110,99 @@ class Coach {
 
     const drawer = findOpenDrawer();
     if (drawer) {
-      if (this.filledDrawer !== drawer) {
-        this.filledDrawer = drawer;
-        this.fillDrawer(drawer, this.pending);
-      }
-      // Follow what the user types, to recognise the alert once saved.
-      const input = drawer.querySelector<HTMLInputElement>(SEL.drawerNameInput);
-      if (input?.value.trim()) this.lastFilledName = input.value.trim();
-      return {
-        name: 'drawer',
-        error: readDrawerError(drawer),
-        emailOff: readDrawerEmailCheckbox(drawer) === false,
-      };
+      if (this.drawer !== drawer) this.attachToDrawer(drawer, this.pending);
+      return { name: 'drawer', error: readDrawerError(drawer), emailOff: readDrawerEmailCheckbox(drawer) === false };
     }
 
-    if (this.filledDrawer) {
-      // The form just closed: saved, or cancelled? Discogs may refresh its list a moment later.
-      this.filledDrawer = null;
+    if (this.drawer) {
+      // The form just closed: saved or cancelled? Discogs may refresh its list a moment later.
+      this.detachFromDrawer();
       this.closedAt = Date.now();
-    }
-    if (this.closedAt && Date.now() - this.closedAt < SAVE_CONFIRM_WINDOW_MS) {
-      const saved = this.findSavedName();
-      if (saved) {
-        this.closedAt = 0;
-        void pendingAlertItem.setValue(null);
-        void alertsSetItem.getValue().then((n) => alertsSetItem.setValue(n + 1));
-        return { name: 'done', alertName: saved, frequency: this.pending.frequency };
+      this.clearTimers();
+      for (const delay of [CHECKING_DISPLAY_MS, SAVE_CONFIRM_WINDOW_MS]) {
+        this.timers.push(window.setTimeout(() => this.update(), delay + 50));
       }
+    }
+    const sinceClose = Date.now() - this.closedAt;
+    if (this.closedAt && sinceClose < SAVE_CONFIRM_WINDOW_MS) {
+      const saved = this.findNewAlert();
+      if (saved) return this.succeed(saved);
+      if (sinceClose < CHECKING_DISPLAY_MS) return { name: 'checking' };
     }
     return { name: 'save' };
   }
 
-  /** After saving, Discogs adds the new alert to its "Saved Searches" list. */
-  private findSavedName(): string | null {
-    if (!this.pending) return null;
-    const expected = this.lastFilledName?.toLowerCase();
-    const names = readSavedSearchNames();
-    if (expected) {
-      const match = names.find((n) => n.toLowerCase() === expected);
-      if (match) return match;
-    }
-    const select = findSavedSearchesSelect();
-    const selected = select?.selectedOptions[0];
-    if (select && selected && selected.value !== '-1' && names.length > this.savedCountBefore) {
-      return selected.text.trim();
-    }
-    return null;
+  private clearTimers(): void {
+    for (const timer of this.timers) clearTimeout(timer);
+    this.timers = [];
   }
 
-  private fillDrawer(drawer: Element, pending: PendingAlert): void {
-    this.savedCountBefore = readSavedSearchNames().length;
+  private succeed(alertName: string): Step {
+    this.clearTimers();
+    this.closedAt = 0;
+    const pending = this.pending as PendingAlert;
+    void clearPendingAlert(pending.releaseIds);
+    void alertsSetItem.getValue().then((n) => alertsSetItem.setValue(n + 1));
+    return { name: 'done', alertName, frequency: pending.frequency };
+  }
+
+  /** A saved alert that did not exist before the form opened: the one the user just saved. */
+  private findNewAlert(): string | null {
+    const added = readSavedSearchNames().filter((n) => !this.namesBefore.has(n.toLowerCase()));
+    if (!added.length) return null;
+    const expected = this.formName?.toLowerCase();
+    return added.find((n) => n.toLowerCase() === expected) ?? (added.length === 1 ? (added[0] as string) : null);
+  }
+
+  private attachToDrawer(drawer: Element, pending: PendingAlert): void {
+    this.detachFromDrawer();
+    this.drawer = drawer;
+    this.namesBefore = new Set(readSavedSearchNames().map((n) => n.toLowerCase()));
+
     const input = drawer.querySelector<HTMLInputElement>(SEL.drawerNameInput);
+    this.nameWasFilled = false;
     if (input && isDefaultAlertName(input.value)) {
-      const name = makeUnique(pending.name, readSavedSearchNames());
-      setNativeInputValue(input, name);
-      this.lastFilledName = name;
-    } else {
-      this.lastFilledName = input?.value ?? null;
+      setNativeInputValue(input, makeUnique(pending.name, readSavedSearchNames()));
+      this.nameWasFilled = true;
     }
+    this.formName = input?.value.trim() || null;
+
     const radio = drawer.querySelector<HTMLInputElement>(SEL.frequencyRadio(pending.frequency));
     if (radio && !radio.checked) radio.click();
+
+    // Follow what the user types, and read the final name when they press Save.
+    const readName = () => {
+      if (input?.value.trim()) this.formName = input.value.trim();
+    };
+    input?.addEventListener('input', readName);
+    const save = drawer.querySelector(SEL.drawerSaveButton);
+    save?.addEventListener('click', readName, { capture: true });
+    this.drawerCleanup = () => {
+      input?.removeEventListener('input', readName);
+      save?.removeEventListener('click', readName, { capture: true });
+    };
+  }
+
+  private detachFromDrawer(): void {
+    this.drawerCleanup();
+    this.drawerCleanup = () => undefined;
+    this.drawer = null;
   }
 
   private go(step: Step): void {
-    const same = JSON.stringify(step) === JSON.stringify(this.step);
+    const changed = JSON.stringify(step) !== JSON.stringify(this.step);
+    const stepChanged = step.name !== this.step.name;
     this.step = step;
-    if (!same) this.render();
+    if (changed) this.render();
+    // Bring keyboard and screen reader users to the new step (not while Discogs' form has focus).
+    if (stepChanged && step.name !== 'drawer' && step.name !== 'help-closed' && step.name !== 'checking') {
+      this.focusTitle();
+    }
     this.point();
+  }
+
+  private focusTitle(): void {
+    this.root.querySelector<HTMLElement>('#cb-coach-title')?.focus({ preventScroll: true });
   }
 
   /** Moves the pink ring to whatever the user should click next. */
@@ -180,8 +213,7 @@ class Coach {
     } else if (s.name === 'drawer') {
       const drawer = findOpenDrawer();
       if (s.emailOff) {
-        const link = drawer?.querySelector('a[href*="notification"]') ?? null;
-        this.spotlight.show(link, '');
+        this.spotlight.show(drawer?.querySelector('a[href*="notification"]') ?? null, '');
       } else {
         this.spotlight.show(drawer?.querySelector(SEL.drawerSaveButton) ?? null, t('coachRingSave'));
       }
@@ -195,18 +227,18 @@ class Coach {
   private close(): void {
     this.dismissed = true;
     this.spotlight.hide();
-    if (this.pending) void pendingAlertItem.setValue(null);
+    this.clearTimers();
+    if (this.pending) void clearPendingAlert(this.pending.releaseIds);
     this.pending = null;
     replaceChildren(this.root);
   }
 
-  private panel(content: HTMLElement[], options: { passive?: boolean; closable?: boolean } = {}): HTMLElement {
+  private panel(content: (HTMLElement | null)[], options: { passive?: boolean; closable?: boolean } = {}): HTMLElement {
     return h(
       'section',
       {
         class: `cb-coach${options.passive ? ' cb-coach--passive' : ''}`,
-        role: 'dialog',
-        'aria-modal': 'false',
+        role: 'region',
         'aria-labelledby': 'cb-coach-title',
       },
       h(
@@ -218,7 +250,13 @@ class Coach {
           ? null
           : h(
               'button',
-              { type: 'button', class: 'cb-btn', 'aria-label': t('close'), on: { click: () => this.close() } },
+              {
+                type: 'button',
+                class: 'cb-btn',
+                'aria-label': t('close'),
+                dataset: { focusKey: 'close' },
+                on: { click: () => this.close() },
+              },
               icon('close'),
             ),
       ),
@@ -227,9 +265,20 @@ class Coach {
   }
 
   private render(): void {
+    renderKeepingFocus(this.root, () => this.draw());
+  }
+
+  private draw(): void {
     const s = this.step;
-    const title = (text: string) => h('h2', { class: 'cb-coach__title', id: 'cb-coach-title' }, text);
+    const title = (text: string) => h('h2', { class: 'cb-coach__title', id: 'cb-coach-title', tabindex: '-1' }, text);
     const text = (value: string) => h('p', { class: 'cb-coach__text' }, value);
+    const button = (key: string, label: string, onClick: () => void, variant = 'secondary', ...extra: Node[]) =>
+      h(
+        'button',
+        { type: 'button', class: `cb-btn cb-btn--${variant}`, dataset: { focusKey: key }, on: { click: onClick } },
+        ...extra,
+        label,
+      );
 
     switch (s.name) {
       case 'help-closed':
@@ -237,7 +286,12 @@ class Coach {
           this.root,
           h(
             'button',
-            { type: 'button', class: 'cb-pill', on: { click: () => this.go({ name: 'help-open', topic: 'menu' }) } },
+            {
+              type: 'button',
+              class: 'cb-pill',
+              dataset: { focusKey: 'pill' },
+              on: { click: () => this.go({ name: 'help-open', topic: 'menu' }) },
+            },
             h('span', { class: 'cb-disc cb-disc--xs' }, icon('bell')),
             t('coachHelpPill'),
           ),
@@ -254,26 +308,14 @@ class Coach {
                   h(
                     'div',
                     { class: 'cb-coach__actions' },
-                    h(
-                      'button',
-                      {
-                        type: 'button',
-                        class: 'cb-btn cb-btn--secondary cb-btn--block',
-                        on: { click: () => this.go({ name: 'help-open', topic: 'delete' }) },
-                      },
-                      icon('trash'),
+                    button(
+                      'delete',
                       t('coachHelpDelete'),
+                      () => this.go({ name: 'help-open', topic: 'delete' }),
+                      'secondary cb-btn--block',
+                      icon('trash'),
                     ),
-                    h(
-                      'button',
-                      {
-                        type: 'button',
-                        class: 'cb-btn cb-btn--secondary cb-btn--block',
-                        on: { click: () => openGuide('how') },
-                      },
-                      icon('bell'),
-                      t('coachHelpNew'),
-                    ),
+                    button('new', t('coachHelpNew'), () => openGuide('how'), 'secondary cb-btn--block', icon('bell')),
                   ),
                   h(
                     'p',
@@ -299,15 +341,7 @@ class Coach {
                   h(
                     'div',
                     { class: 'cb-coach__actions' },
-                    h(
-                      'button',
-                      {
-                        type: 'button',
-                        class: 'cb-btn cb-btn--ghost',
-                        on: { click: () => this.go({ name: 'help-closed' }) },
-                      },
-                      t('done'),
-                    ),
+                    button('done', t('done'), () => this.go({ name: 'help-closed' }), 'ghost'),
                   ),
                 ],
           ),
@@ -323,11 +357,7 @@ class Coach {
             h(
               'div',
               { class: 'cb-coach__actions' },
-              h(
-                'button',
-                { type: 'button', class: 'cb-btn cb-btn--primary', on: { click: () => window.location.reload() } },
-                t('reload'),
-              ),
+              button('reload', t('reload'), () => window.location.reload(), 'primary'),
             ),
           ]),
         );
@@ -335,40 +365,34 @@ class Coach {
 
       case 'save': {
         const pending = this.pending;
+        const count = pending?.releaseIds.length ?? 0;
+        const intro =
+          pending?.kind === 'master'
+            ? count === 1
+              ? t('coachSaveTextMasterOne')
+              : t('coachSaveTextMaster', String(count))
+            : t('coachSaveText');
         replaceChildren(
           this.root,
-          this.panel(
-            [
-              title(t('coachSaveTitle')),
-              text(
-                pending?.kind === 'master'
-                  ? t('coachSaveTextMaster', String(pending.releaseIds.length))
-                  : t('coachSaveText'),
+          this.panel([
+            title(t('coachSaveTitle')),
+            text(intro),
+            pending?.truncated
+              ? h('div', { class: 'cb-notice cb-notice--info' }, icon('info'), h('span', null, t('coachTruncated')))
+              : null,
+            h(
+              'div',
+              { class: 'cb-coach__actions' },
+              button(
+                'open-form',
+                t('coachOpenForm'),
+                () => findSaveSearchButton()?.click(),
+                'primary',
+                icon('arrowRight'),
               ),
-              pending?.truncated
-                ? h('div', { class: 'cb-notice cb-notice--info' }, icon('info'), h('span', null, t('coachTruncated')))
-                : null,
-              h(
-                'div',
-                { class: 'cb-coach__actions' },
-                h(
-                  'button',
-                  {
-                    type: 'button',
-                    class: 'cb-btn cb-btn--primary',
-                    on: { click: () => findSaveSearchButton()?.click() },
-                  },
-                  t('coachOpenForm'),
-                  icon('arrowRight'),
-                ),
-                h(
-                  'button',
-                  { type: 'button', class: 'cb-btn cb-btn--ghost', on: { click: () => this.close() } },
-                  t('cancel'),
-                ),
-              ),
-            ].filter(Boolean) as HTMLElement[],
-          ),
+              button('cancel', t('cancel'), () => this.close(), 'ghost'),
+            ),
+          ]),
         );
         return;
       }
@@ -376,59 +400,66 @@ class Coach {
       case 'drawer': {
         const frequency =
           this.pending?.frequency === 'digest' ? t('frequencyDigestShort') : t('frequencyRealtimeShort');
-        const content: HTMLElement[] = [
-          title(t('coachDrawerTitle')),
-          text(t('coachDrawerText', [this.lastFilledName ?? '', frequency])),
-        ];
-        if (s.emailOff) {
-          content.push(
-            h('div', { class: 'cb-notice', role: 'alert' }, icon('mail'), h('span', null, t('coachEmailOff'))),
-          );
-        }
-        if (s.error) {
-          content.push(
-            h(
-              'div',
-              { class: 'cb-notice cb-notice--error', role: 'alert' },
-              icon('warning'),
-              h('span', null, t(`coachError_${s.error.replace(/-/g, '_')}` as MessageKey)),
-            ),
-          );
-        }
-        content.push(h('p', { class: 'cb-small cb-muted' }, t('coachDrawerNote')));
-        replaceChildren(this.root, this.panel(content, { passive: true, closable: false }));
+        replaceChildren(
+          this.root,
+          this.panel(
+            [
+              title(t('coachDrawerTitle')),
+              text(
+                this.nameWasFilled
+                  ? t('coachDrawerText', [this.formName ?? '', frequency])
+                  : t('coachDrawerTextKept', frequency),
+              ),
+              s.emailOff ? h('div', { class: 'cb-notice' }, icon('mail'), h('span', null, t('coachEmailOff'))) : null,
+              s.error
+                ? h(
+                    'div',
+                    { class: 'cb-notice cb-notice--error' },
+                    icon('warning'),
+                    h('span', null, t(`coachError_${s.error.replace(/-/g, '_')}` as MessageKey)),
+                  )
+                : null,
+              h('p', { class: 'cb-small cb-muted' }, t('coachDrawerNote')),
+            ],
+            { passive: true, closable: false },
+          ),
+        );
         return;
       }
+
+      case 'checking':
+        replaceChildren(
+          this.root,
+          this.panel([
+            title(t('coachCheckingTitle')),
+            h('p', { class: 'cb-coach__text', role: 'status' }, t('coachCheckingText')),
+          ]),
+        );
+        return;
 
       case 'done':
         replaceChildren(
           this.root,
           this.panel([
+            title(t('coachDoneTitle')),
             h(
               'div',
-              { class: 'cb-notice cb-notice--success', role: 'status' },
+              { class: 'cb-notice cb-notice--success' },
               icon('check'),
-              h('strong', null, t('coachDoneTitle')),
-            ),
-            text(
-              s.frequency === 'digest'
-                ? t('coachDoneTextDigest', s.alertName)
-                : t('coachDoneTextRealtime', s.alertName),
+              h(
+                'span',
+                null,
+                s.frequency === 'digest'
+                  ? t('coachDoneTextDigest', s.alertName)
+                  : t('coachDoneTextRealtime', s.alertName),
+              ),
             ),
             text(t('coachDoneRemove')),
             h(
               'div',
               { class: 'cb-coach__actions' },
-              h(
-                'button',
-                { type: 'button', class: 'cb-btn cb-btn--primary', on: { click: () => this.close() } },
-                t('gotIt'),
-              ),
-              h(
-                'button',
-                { type: 'button', class: 'cb-btn cb-btn--ghost', on: { click: () => history.back() } },
-                t('coachBackToRecord'),
-              ),
+              button('got-it', t('gotIt'), () => this.close(), 'primary'),
+              button('back', t('coachBackToRecord'), () => history.back(), 'ghost'),
             ),
             h(
               'p',

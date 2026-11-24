@@ -17,7 +17,8 @@
   --line: #000000;
   --hairline: #e8e2e5;
   --disabled-fill: #f2eff0;
-  --disabled-ink: #8c8689;
+  /* Darker than Highlighter's #8c8689 so busy labels stay readable (4.7:1 on disabled-fill). */
+  --disabled-ink: #6b6668;
   --green-ink: #16733f;
   --green-soft: #ddf4e6;
   --amber-ink: #875700;

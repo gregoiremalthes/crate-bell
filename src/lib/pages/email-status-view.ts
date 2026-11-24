@@ -3,7 +3,7 @@ import { checkEmailSetting } from '../email-status';
 import { t } from '../i18n';
 import { type EmailStatus, emailStatusItem } from '../store';
 import { icon } from '../ui/content-ui';
-import { h, replaceChildren } from '../ui/dom';
+import { h, renderKeepingFocus, replaceChildren } from '../ui/dom';
 
 /** "Sale alert emails: on / off / not checked yet", with the one action that fixes it. */
 export function mountEmailStatus(container: HTMLElement): () => void {
@@ -45,6 +45,7 @@ export function mountEmailStatus(container: HTMLElement): () => void {
       {
         type: 'button',
         class: 'cb-btn cb-btn--ghost cb-btn--sm',
+        dataset: { focusKey: 'check' },
         'aria-busy': checking ? 'true' : undefined,
         on: {
           click: async () => {
@@ -60,22 +61,24 @@ export function mountEmailStatus(container: HTMLElement): () => void {
       checking ? t('emailChecking') : t('emailCheckAgain'),
     );
 
-    replaceChildren(
-      container,
-      h(
-        'div',
-        { class: `cb-status cb-status--${kind}`, role: 'status', 'aria-live': 'polite' },
-        h(
-          'span',
-          { class: 'cb-status__dot', 'aria-hidden': 'true' },
-          icon(kind === 'on' ? 'check' : kind === 'off' ? 'warning' : 'mail'),
-        ),
+    renderKeepingFocus(container, () =>
+      replaceChildren(
+        container,
         h(
           'div',
-          null,
-          h('p', { class: 'cb-status__title' }, title),
-          h('p', { class: 'cb-small' }, text),
-          h('div', { class: 'cb-status__actions' }, settingsLink, checkButton),
+          { class: `cb-status cb-status--${kind}`, role: 'status', 'aria-live': 'polite' },
+          h(
+            'span',
+            { class: 'cb-status__dot', 'aria-hidden': 'true' },
+            icon(kind === 'on' ? 'check' : kind === 'off' ? 'warning' : 'mail'),
+          ),
+          h(
+            'div',
+            null,
+            h('p', { class: 'cb-status__title' }, title),
+            h('p', { class: 'cb-small' }, text),
+            h('div', { class: 'cb-status__actions' }, settingsLink, checkButton),
+          ),
         ),
       ),
     );

@@ -46,27 +46,56 @@ export interface PendingAlert {
   truncated?: boolean;
 }
 
-export const pendingAlertItem = storage.defineItem<PendingAlert | null>('local:pendingAlert', {
-  fallback: null,
+/** Pending alerts by record, so several tabs can each prepare their own alert. */
+export const pendingAlertsItem = storage.defineItem<Record<string, PendingAlert>>('local:pendingAlerts', {
+  fallback: {},
 });
 
 /** A pending alert is only valid for a few minutes, so an old one never pre-fills by surprise. */
 export const PENDING_TTL_MS = 10 * 60 * 1000;
 
-export function isPendingFresh(pending: PendingAlert | null, now = Date.now()): pending is PendingAlert {
+export function isPendingFresh(pending: PendingAlert | null | undefined, now = Date.now()): pending is PendingAlert {
   return !!pending && now - pending.createdAt < PENDING_TTL_MS;
 }
 
+/** The same set of releases gives the same key, whatever the order in the URL. */
+export const pendingKey = (releaseIds: number[]): string => [...new Set(releaseIds)].sort((a, b) => a - b).join(',');
+
 /** Does the pending alert match the release filters on the page the user landed on? */
 export function pendingMatchesPage(pending: PendingAlert, pageReleaseIds: number[]): boolean {
-  if (!pageReleaseIds.length) return false;
-  const onPage = new Set(pageReleaseIds);
-  return pending.releaseIds.length === onPage.size && pending.releaseIds.every((id) => onPage.has(id));
+  return pageReleaseIds.length > 0 && pendingKey(pending.releaseIds) === pendingKey(pageReleaseIds);
+}
+
+const withoutExpired = (all: Record<string, PendingAlert>, now = Date.now()) =>
+  Object.fromEntries(Object.entries(all).filter(([, p]) => isPendingFresh(p, now)));
+
+export async function savePendingAlert(pending: PendingAlert): Promise<void> {
+  const all = withoutExpired(await pendingAlertsItem.getValue());
+  all[pendingKey(pending.releaseIds)] = pending;
+  await pendingAlertsItem.setValue(all);
+}
+
+export async function findPendingAlert(pageReleaseIds: number[]): Promise<PendingAlert | null> {
+  if (!pageReleaseIds.length) return null;
+  const all = await pendingAlertsItem.getValue();
+  const pending = all[pendingKey(pageReleaseIds)];
+  return isPendingFresh(pending) ? pending : null;
+}
+
+export async function clearPendingAlert(releaseIds: number[]): Promise<void> {
+  const all = withoutExpired(await pendingAlertsItem.getValue());
+  delete all[pendingKey(releaseIds)];
+  await pendingAlertsItem.setValue(all);
 }
 
 export interface EmailStatus {
   state: EmailSettingState;
+  /** When this answer was read from Discogs. */
   checkedAt: number;
+  /** Last attempt, successful or not, so a failing check is not retried on every page. */
+  attemptedAt?: number;
+  /** Read from an extension page (popup, guide), where the Discogs session may be missing. */
+  fromExtension?: boolean;
 }
 
 export const emailStatusItem = storage.defineItem<EmailStatus | null>('local:emailStatus', {
@@ -75,5 +104,7 @@ export const emailStatusItem = storage.defineItem<EmailStatus | null>('local:ema
 
 /** Re-read the Discogs setting at most this often while browsing. */
 export const EMAIL_STATUS_TTL_MS = 6 * 60 * 60 * 1000;
+/** Retry delay when the last answer was "logged out" or "unknown". */
+export const EMAIL_STATUS_RETRY_MS = 30 * 60 * 1000;
 
 export const alertsSetItem = storage.defineItem<number>('local:alertsSet', { fallback: 0 });

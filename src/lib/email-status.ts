@@ -1,6 +1,6 @@
 import { parseEmailSetting } from './discogs/selectors';
 import { notificationSettingsUrl } from './discogs/urls';
-import { EMAIL_STATUS_TTL_MS, type EmailStatus, emailStatusItem } from './store';
+import { EMAIL_STATUS_RETRY_MS, EMAIL_STATUS_TTL_MS, type EmailStatus, emailStatusItem } from './store';
 
 /**
  * Reads the user's Discogs notification settings page to see whether sale alert emails are on.
@@ -25,18 +25,32 @@ export async function checkEmailSetting(fetchImpl: typeof fetch = fetch): Promis
   } catch {
     // Offline, blocked or Discogs down: keep "unknown", the UI then simply says nothing.
   }
-  // Never overwrite a known answer with "unknown".
   const previous = await emailStatusItem.getValue();
-  if (status.state !== 'unknown' || !previous) await emailStatusItem.setValue(status);
-  return status.state === 'unknown' && previous ? previous : status;
+  const settled = (state?: string) => state === 'on' || state === 'off';
+  // A check made from an extension page may lack the Discogs session: never let it erase on/off.
+  const fromExtensionPage = typeof location !== 'undefined' && location.protocol.endsWith('-extension:');
+  const keepPrevious =
+    !!previous &&
+    settled(previous.state) &&
+    (status.state === 'unknown' || (fromExtensionPage && !settled(status.state)));
+  const next: EmailStatus = keepPrevious
+    ? { ...previous, attemptedAt: checkedAt }
+    : { ...status, attemptedAt: checkedAt, fromExtension: fromExtensionPage };
+  await emailStatusItem.setValue(next);
+  return next;
 }
 
 export async function refreshEmailStatusIfStale(): Promise<EmailStatus | null> {
   const current = await emailStatusItem.getValue();
-  // "logged-out" may come from a check made outside Discogs (popup): re-check from the page itself.
-  const settled = current && (current.state === 'on' || current.state === 'off');
-  if (settled && Date.now() - current.checkedAt < EMAIL_STATUS_TTL_MS) {
-    return current;
+  if (current) {
+    const settled = current.state === 'on' || current.state === 'off';
+    // An unsure answer from the popup is re-checked from the first Discogs page, which has the session.
+    const unsureFromExtension =
+      !settled && current.fromExtension && typeof location !== 'undefined' && location.protocol === 'https:';
+    const last = Math.max(current.checkedAt, current.attemptedAt ?? 0);
+    if (!unsureFromExtension && Date.now() - last < (settled ? EMAIL_STATUS_TTL_MS : EMAIL_STATUS_RETRY_MS)) {
+      return current;
+    }
   }
   return checkEmailSetting();
 }

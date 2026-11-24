@@ -175,5 +175,12 @@
   "privacyLink": "Confidentialité",
   "sourceLink": "Code source",
   "settingsHintOn": "Crate Bell : voici le réglage dont les alertes ont besoin. Il est activé.",
-  "settingsHintOff": "Crate Bell : cochez Personal Email sur cette ligne, puis enregistrez en bas de la page."
+  "settingsHintOff": "Crate Bell : cochez Personal Email sur cette ligne, puis enregistrez en bas de la page.",
+  "lang": "fr",
+  "navLabel": "Sections",
+  "masterSetAlertOne": "Créer l'alerte pour ce pressage",
+  "coachSaveTextMasterOne": "1 pressage est sélectionné à gauche. Ajustez les filtres si vous le souhaitez, puis ouvrez le formulaire d'enregistrement.",
+  "coachDrawerTextKept": "Vérifiez le nom, et choisissez $1 si vous le souhaitez. Cliquez ensuite sur Save Search en bas du formulaire.",
+  "coachCheckingTitle": "Vérification auprès de Discogs…",
+  "coachCheckingText": "Crate Bell cherche votre nouvelle alerte dans la liste Saved Searches."
 }
