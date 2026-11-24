@@ -33,7 +33,9 @@ export async function checkEmailSetting(fetchImpl: typeof fetch = fetch): Promis
 
 export async function refreshEmailStatusIfStale(): Promise<EmailStatus | null> {
   const current = await emailStatusItem.getValue();
-  if (current && Date.now() - current.checkedAt < EMAIL_STATUS_TTL_MS && current.state !== 'unknown') {
+  // "logged-out" may come from a check made outside Discogs (popup): re-check from the page itself.
+  const settled = current && (current.state === 'on' || current.state === 'off');
+  if (settled && Date.now() - current.checkedAt < EMAIL_STATUS_TTL_MS) {
     return current;
   }
   return checkEmailSetting();

@@ -8,7 +8,6 @@
   "gotIt": "Got it",
   "reload": "Reload the page",
   "howItWorks": "How it works",
-
   "releaseAddAndAlert": "Alert me when it's for sale",
   "releaseSetAlert": "Set a sale alert",
   "releaseAdding": "Adding to your wantlist…",
@@ -20,7 +19,6 @@
   "releaseLoggedOut": "Log in to Discogs to set sale alerts",
   "emailOffShort": "Sale alert emails are off on your Discogs account, so alerts cannot reach you.",
   "emailOffFix": "Turn them on",
-
   "masterTitle": "Want any pressing of this album?",
   "masterIntro": "Discogs only emails you about records in your wantlist. Set one alert that covers every pressing you would accept.",
   "masterLoading": "Looking up the pressings…",
@@ -36,7 +34,6 @@
   "masterPickFormat": "Pick at least one format",
   "masterTruncated": "Discogs allows 100 filters per alert, so this alert covers the $1 oldest of the $2 pressings. Choose fewer formats to cover them all.",
   "masterAlertSuffix": "(any $1 pressing)",
-
   "coachHelpPill": "Crate Bell help",
   "coachHelpTitle": "What would you like to do?",
   "coachHelpDelete": "Delete a sale alert",
@@ -76,21 +73,19 @@
   "coffeeLink": "Buy me a coffee",
   "coffeeTitle": "Free, and made by a fellow collector",
   "coffeeText": "Crate Bell shows no ads and collects nothing. If it saves you time, you can buy me a coffee.",
-
   "emailSectionTitle": "Sale alert emails",
   "emailOnTitle": "On",
   "emailOnText": "Discogs can email you when a record from your wantlist is listed.",
   "emailOffTitle": "Off",
   "emailOffText": "Discogs will not email you, so sale alerts stay silent. Tick Personal Email on the line \"When a release in my wantlist is listed for sale\", then save.",
-  "emailLoggedOutTitle": "Log in to Discogs",
-  "emailLoggedOutText": "Crate Bell checks this setting on your Discogs account. Log in to Discogs, then check again.",
+  "emailLoggedOutTitle": "Not checked yet",
+  "emailLoggedOutText": "Crate Bell could not read this setting. Open any Discogs page while logged in, then check again.",
   "emailUnknownTitle": "Not checked yet",
   "emailUnknownText": "Open any Discogs page while logged in, or check now.",
   "emailTurnOn": "Turn them on",
   "emailOpenSettings": "Open settings",
   "emailCheckAgain": "Check again",
   "emailChecking": "Checking…",
-
   "prefsSectionTitle": "When a copy is listed",
   "prefsFrequency": "Email me",
   "frequencyRealtime": "Right away",
@@ -113,7 +108,6 @@
   "prefsMore": "More preferences",
   "popupRemoveAlert": "Remove an alert",
   "notAffiliated": "Not affiliated with Discogs.",
-
   "skipToContent": "Skip to content",
   "navEmail": "Emails",
   "navHow": "Set an alert",

@@ -34,10 +34,12 @@
       const drawer = document.querySelector('[data-slot="sheet-content"]');
       drawer.querySelector('[data-test="button-drawer-save-search"]').addEventListener('click', () => {
         const name = drawer.querySelector('#save-search-name').value;
-        const select = document.querySelector('[data-test="saved-searches"]');
-        const option = new Option(name, '999999', true, true);
-        select.add(option);
         drawer.remove();
+        // Like the real page, the list of saved searches refreshes a moment after the form closes.
+        setTimeout(() => {
+          const select = document.querySelector('[data-test="saved-searches"]');
+          select.add(new Option(name, '999999', true, true));
+        }, 600);
       });
       drawer.querySelector('button:not([data-test])').addEventListener('click', () => drawer.remove());
     });

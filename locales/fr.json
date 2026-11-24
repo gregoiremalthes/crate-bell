@@ -8,7 +8,6 @@
   "gotIt": "Compris",
   "reload": "Recharger la page",
   "howItWorks": "Comment ça marche",
-
   "releaseAddAndAlert": "Prévenez-moi quand il est en vente",
   "releaseSetAlert": "Créer une alerte de vente",
   "releaseAdding": "Ajout à votre wantlist…",
@@ -20,7 +19,6 @@
   "releaseLoggedOut": "Connectez-vous à Discogs pour créer des alertes",
   "emailOffShort": "Les emails d'alerte sont désactivés sur votre compte Discogs : vos alertes ne peuvent pas vous parvenir.",
   "emailOffFix": "Les activer",
-
   "masterTitle": "N'importe quel pressage vous convient ?",
   "masterIntro": "Discogs ne vous écrit que pour les disques de votre wantlist. Créez une seule alerte pour tous les pressages que vous accepteriez.",
   "masterLoading": "Recherche des pressages…",
@@ -36,7 +34,6 @@
   "masterPickFormat": "Choisissez au moins un format",
   "masterTruncated": "Discogs autorise 100 filtres par alerte : cette alerte couvre les $1 plus anciens des $2 pressages. Choisissez moins de formats pour tout couvrir.",
   "masterAlertSuffix": "(tout pressage $1)",
-
   "coachHelpPill": "Aide Crate Bell",
   "coachHelpTitle": "Que voulez-vous faire ?",
   "coachHelpDelete": "Supprimer une alerte",
@@ -76,21 +73,19 @@
   "coffeeLink": "Offrez-moi un café",
   "coffeeTitle": "Gratuit, et fait par un collectionneur",
   "coffeeText": "Crate Bell n'affiche aucune publicité et ne collecte rien. S'il vous fait gagner du temps, vous pouvez m'offrir un café.",
-
   "emailSectionTitle": "Emails d'alerte",
   "emailOnTitle": "Activés",
   "emailOnText": "Discogs peut vous écrire quand un disque de votre wantlist est mis en vente.",
   "emailOffTitle": "Désactivés",
   "emailOffText": "Discogs ne vous écrira pas : vos alertes restent muettes. Cochez Personal Email sur la ligne « When a release in my wantlist is listed for sale », puis enregistrez.",
-  "emailLoggedOutTitle": "Connectez-vous à Discogs",
-  "emailLoggedOutText": "Crate Bell vérifie ce réglage sur votre compte Discogs. Connectez-vous à Discogs, puis vérifiez de nouveau.",
+  "emailLoggedOutTitle": "Pas encore vérifié",
+  "emailLoggedOutText": "Crate Bell n'a pas pu lire ce réglage. Ouvrez une page Discogs en étant connecté, puis vérifiez de nouveau.",
   "emailUnknownTitle": "Pas encore vérifié",
   "emailUnknownText": "Ouvrez une page Discogs en étant connecté, ou vérifiez maintenant.",
   "emailTurnOn": "Les activer",
   "emailOpenSettings": "Ouvrir les réglages",
   "emailCheckAgain": "Vérifier de nouveau",
   "emailChecking": "Vérification…",
-
   "prefsSectionTitle": "Quand un exemplaire est en vente",
   "prefsFrequency": "M'écrire",
   "frequencyRealtime": "Tout de suite",
@@ -113,7 +108,6 @@
   "prefsMore": "Plus de préférences",
   "popupRemoveAlert": "Supprimer une alerte",
   "notAffiliated": "Sans lien avec Discogs.",
-
   "skipToContent": "Aller au contenu",
   "navEmail": "Emails",
   "navHow": "Créer une alerte",

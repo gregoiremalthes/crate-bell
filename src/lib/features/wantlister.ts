@@ -22,6 +22,9 @@ import { alertsSetItem, isPendingFresh, type PendingAlert, pendingAlertItem, pen
 import { icon, openGuide, Spotlight } from '../ui/content-ui';
 import { h, onDomChange, replaceChildren } from '../ui/dom';
 
+/** How long after the save form closes we keep looking for the new alert in Discogs' list. */
+const SAVE_CONFIRM_WINDOW_MS = 8_000;
+
 type Step =
   | { name: 'help-closed' }
   | { name: 'help-open'; topic: 'menu' | 'delete' }
@@ -58,6 +61,7 @@ class Coach {
   private dismissed = false;
   private lastFilledName: string | null = null;
   private savedCountBefore = 0;
+  private closedAt = 0;
 
   constructor(container: HTMLElement) {
     this.root = h('div', { class: 'cb-root' });
@@ -103,6 +107,9 @@ class Coach {
         this.filledDrawer = drawer;
         this.fillDrawer(drawer, this.pending);
       }
+      // Follow what the user types, to recognise the alert once saved.
+      const input = drawer.querySelector<HTMLInputElement>(SEL.drawerNameInput);
+      if (input?.value.trim()) this.lastFilledName = input.value.trim();
       return {
         name: 'drawer',
         error: readDrawerError(drawer),
@@ -110,11 +117,15 @@ class Coach {
       };
     }
 
-    if (this.step.name === 'drawer' && this.filledDrawer) {
-      // The form just closed: saved, or cancelled?
-      const saved = this.findSavedName();
+    if (this.filledDrawer) {
+      // The form just closed: saved, or cancelled? Discogs may refresh its list a moment later.
       this.filledDrawer = null;
+      this.closedAt = Date.now();
+    }
+    if (this.closedAt && Date.now() - this.closedAt < SAVE_CONFIRM_WINDOW_MS) {
+      const saved = this.findSavedName();
       if (saved) {
+        this.closedAt = 0;
         void pendingAlertItem.setValue(null);
         void alertsSetItem.getValue().then((n) => alertsSetItem.setValue(n + 1));
         return { name: 'done', alertName: saved, frequency: this.pending.frequency };

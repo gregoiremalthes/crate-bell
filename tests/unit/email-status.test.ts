@@ -43,3 +43,20 @@ describe('checkEmailSetting', () => {
     expect((await emailStatusItem.getValue())?.state).toBe('on');
   });
 });
+
+describe('refreshEmailStatusIfStale', () => {
+  beforeEach(() => fakeBrowser.reset());
+
+  it('trusts a recent on/off answer, but re-checks a "logged-out" one', async () => {
+    const { refreshEmailStatusIfStale } = await import('@/lib/email-status');
+    await emailStatusItem.setValue({ state: 'on', checkedAt: Date.now() });
+    const spy = vi.spyOn(globalThis, 'fetch');
+    expect((await refreshEmailStatusIfStale())?.state).toBe('on');
+    expect(spy).not.toHaveBeenCalled();
+
+    await emailStatusItem.setValue({ state: 'logged-out', checkedAt: Date.now() });
+    spy.mockResolvedValue(new Response(settingsHtml));
+    await refreshEmailStatusIfStale();
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});
