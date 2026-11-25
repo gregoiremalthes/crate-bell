@@ -15,7 +15,7 @@ The number of clicks is not the main problem. Understanding is: people do not kn
 
 ## What it does
 
-1. **Record page (release).** Under Discogs' own "Add to Collection / Wantlist" buttons, one pink button:
+1. **Record page (release) and marketplace listing (`/shop/item/{id}`).** Under Discogs' own wantlist button, one button styled like Discogs' own (pink only on hover):
    - not in the wantlist: "Alert me when it's for sale" adds it to the wantlist with Discogs' own button, then opens the alert page;
    - in the wantlist: "Set a sale alert" opens the alert page;
    - just added with Discogs' button: the button gently moves and says "Added to your wantlist. Want an email when a copy is for sale?";
@@ -23,9 +23,11 @@ The number of clicks is not the main problem. Understanding is: people do not kn
 2. **Album page (master).** A card "Want any pressing of this album?": pick formats (vinyl by default), see where Discogs' "Add all versions to Wantlist" menu is, then set one alert covering all those pressings.
 3. **Alert page ("Items I Want").** A guide panel: points at "Save Search" with a pink ring, fills in the alert name and the email frequency in Discogs' form, points at the final "Save Search", then confirms and explains how the alert will stop. It never saves for the user. Discogs' limits and errors are explained in plain words.
 4. **Notification settings page.** The one line that matters is highlighted, with a hint; Crate Bell remembers whether it is on.
-5. **Alert status.** Once an alert exists, the record page shows "Sale alert on" (frequency, name, date) instead of the button, with "Delete this alert" and a "Set a different alert" link. If the record has left the wantlist, the alert is shown as paused, with "Put it back in my wantlist". The wantlist page (`/mywantlist`) gets a small "Set alert" button on every record, or an "Alert on" tag.
-6. **Popup.** Email status (on, off, unknown) with a fix button, the two main preferences, links to the guide.
-7. **Guide page** (opens at install, also the options page): three steps (turn on emails, set an alert, remove an alert), preferences, questions.
+5. **Alert status.** Once an alert exists, the record page shows "Sale alert on" (frequency, name, date) instead of the button, with "Delete this alert" and a "Set a different alert" link. If the record has left the wantlist, the alert is shown as paused, with "Put it back in my wantlist". The wantlist page (`/mywantlist`) gets a small "Set alert" button on every record, or an "Alert on" tag, on the right of the Artist - Title cell (under the title in the cards layout).
+6. **Look.** On Discogs, everything Crate Bell adds matches Discogs' buttons (size, 4px corners, beige or grey fill, thin frame); pink shows on hover, as a small dot on "Alert on" tags, and as the ring that points at the next click. The popup, guide page and goodbye page keep the Highlighter look.
+7. **Popup.** Email status (on, off, unknown) with a fix button, the two main preferences, links to the guide.
+8. **Guide page** (opens at install, also the options page): three steps (turn on emails, set an alert, remove an alert), "What Crate Bell shows on Discogs" (switches per feature, links to saved alerts and wantlist), usual filters (folded with a summary once set), questions, coffee and feedback form.
+9. **Goodbye page** on uninstall (GitHub Pages), with the feedback form.
 
 ## User stories and acceptance criteria
 

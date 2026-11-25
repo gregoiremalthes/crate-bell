@@ -322,6 +322,52 @@ export function parseEmailSetting(doc: ParentNode): EmailSettingState {
   return hasLoginForm ? 'logged-out' : 'unknown';
 }
 
+// ---------- Shop item page (/shop/item/{listingId}) ----------
+
+/** Discogs' "Add to Wantlist" / "In Wantlist" toggle on a marketplace listing. */
+export function findShopWantlistButton(root: ParentNode = document): HTMLButtonElement | null {
+  return root.querySelector<HTMLButtonElement>('button.hifi-wantlist-button-toggle');
+}
+
+export function readShopWantlistState(root: ParentNode = document): WantlistState {
+  const button = findShopWantlistButton(root);
+  if (!button) return 'unknown';
+  const text = button.textContent ?? '';
+  if (/\bin wantlist\b/i.test(text)) return 'in-wantlist';
+  if (/\badd to wantlist\b/i.test(text)) return 'not-in-wantlist';
+  return 'unknown';
+}
+
+/** Our button goes right after the row holding Discogs' wantlist toggle. */
+export function findShopItemAnchor(root: ParentNode = document): Element | null {
+  return findShopWantlistButton(root)?.parentElement ?? null;
+}
+
+/** The release sold in this listing ("Release Details" and the title link point to it). */
+export function readShopItemReleaseId(root: ParentNode = document): number | null {
+  for (const a of root.querySelectorAll<HTMLAnchorElement>(
+    'main a[href*="/release/"], a.hifi-heading-link[href*="/release/"]',
+  )) {
+    const id = /\/release\/(\d+)/.exec(a.getAttribute('href') ?? '')?.[1];
+    if (id) return Number(id);
+  }
+  return null;
+}
+
+export function readShopItemInfo(root: Document = document): RecordInfo {
+  const title = root.querySelector('a.hifi-heading-link[href*="/release/"]')?.textContent?.trim();
+  const artists = [...root.querySelectorAll('a.hifi-heading-link[href*="/artist/"]')].map((a) =>
+    stripDisambiguation(a.textContent ?? ''),
+  );
+  if (title) return { title, artists };
+  // Fallback: "Artist - Title: 12\" for Sale | Discogs"
+  const head = root.title.split(' | ')[0]?.replace(/:[^:]*for sale$/i, '') ?? '';
+  const [artist, ...rest] = head.split(' - ');
+  return rest.length
+    ? { title: rest.join(' - ').trim(), artists: [stripDisambiguation(artist ?? '')] }
+    : { title: head, artists: [] };
+}
+
 // ---------- Wantlist page (/mywantlist) ----------
 
 export interface WantlistItem {

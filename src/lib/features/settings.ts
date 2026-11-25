@@ -21,9 +21,8 @@ export async function initSettingsPage(ctx: ContentScriptContext): Promise<void>
 
   const cell = row.querySelector('td:last-child') ?? row;
   const highlight = (row as HTMLElement).style;
-  highlight.outline = '3px solid #f05fa3';
-  highlight.outlineOffset = '2px';
-  highlight.background = '#fde7f1';
+  highlight.outline = '2px solid #f05fa3';
+  highlight.outlineOffset = '1px';
 
   const ui = await createShadowRootUi(ctx, {
     name: 'crate-bell-settings',

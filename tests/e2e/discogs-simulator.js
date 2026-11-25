@@ -25,6 +25,15 @@
     });
   }
 
+  // Marketplace listing: the "Add to Wantlist" / "In Wantlist" toggle.
+  const toggle = document.querySelector('button.hifi-wantlist-button-toggle');
+  toggle?.addEventListener('click', () => {
+    setTimeout(() => {
+      const label = toggle.querySelector('.hifi-wantlist-button-toggle-label');
+      label.textContent = /add to/i.test(label.textContent) ? 'In Wantlist' : 'Add to Wantlist';
+    }, 150);
+  });
+
   // Items I Want page: the saved searches menu, with Delete and its confirmation.
   const select = document.querySelector('[data-test="saved-searches"]');
   function updateCount() {

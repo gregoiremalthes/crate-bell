@@ -4,7 +4,7 @@ import { defineContentScript } from 'wxt/utils/define-content-script';
 import { parseDiscogsPage } from '@/lib/discogs/urls';
 import { refreshEmailStatusIfStale } from '@/lib/email-status';
 import { initMasterPage } from '@/lib/features/master';
-import { initReleasePage } from '@/lib/features/release';
+import { initReleasePage, initShopItemPage } from '@/lib/features/release';
 import { initSettingsPage } from '@/lib/features/settings';
 import { initWantlistPage } from '@/lib/features/wantlist';
 import { initWantlisterPage } from '@/lib/features/wantlister';
@@ -58,6 +58,8 @@ export default defineContentScript({
         return features.guide ? startCoach() : undefined;
       case 'notification-settings':
         return initSettingsPage(ctx);
+      case 'shop-item':
+        return features.release ? initShopItemPage(ctx) : undefined;
       case 'wantlist':
         return features.wantlist ? initWantlistPage(ctx) : undefined;
     }

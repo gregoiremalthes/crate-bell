@@ -3,9 +3,10 @@ import '@/assets/pages.css';
 import './style.css';
 import { wantlisterHomeUrl } from '@/lib/discogs/urls';
 import { translatePage } from '@/lib/i18n';
-import { ISSUES_URL, KOFI_URL, PRIVACY_URL, REPO_URL } from '@/lib/links';
+import { FEEDBACK_URL, ISSUES_URL, KOFI_URL, PRIVACY_URL, REPO_URL } from '@/lib/links';
 import { mountEmailStatus } from '@/lib/pages/email-status-view';
-import { mountFullPrefs } from '@/lib/pages/prefs-form';
+import { hasCustomFilters, mountFeatureToggles, mountFullPrefs, summarizeFilters } from '@/lib/pages/prefs-form';
+import { getPrefs } from '@/lib/store';
 import { icon } from '@/lib/ui/content-ui';
 import { svg } from '@/lib/ui/dom';
 import { ICONS, RECORD_BELL_ILLUSTRATION } from '@/lib/ui/icons';
@@ -29,7 +30,20 @@ link('link-saved', wantlisterHomeUrl());
 link('link-wantlist', 'https://www.discogs.com/mywantlist');
 
 mountEmailStatus($('email-status'));
-void mountFullPrefs($('prefs'));
+link('feedback', FEEDBACK_URL);
+link('feedback-foot', FEEDBACK_URL);
+void mountFeatureToggles($('features'));
+
+// "Your usual filters" folds away once filled in, with a one-line summary.
+const fold = $('filters-fold') as HTMLDetailsElement;
+const showSummary = (prefs: Awaited<ReturnType<typeof getPrefs>>) => {
+  $('filters-summary').textContent = summarizeFilters(prefs);
+};
+void getPrefs().then((prefs) => {
+  showSummary(prefs);
+  fold.open = !hasCustomFilters(prefs) || location.hash === '#preferences';
+});
+void mountFullPrefs($('prefs'), showSummary);
 
 // Open the matching FAQ entry or scroll to the section asked for (#how, #remove…).
 if (location.hash) {

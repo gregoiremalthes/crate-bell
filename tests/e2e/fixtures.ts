@@ -39,6 +39,7 @@ async function routeDiscogs(context: BrowserContext): Promise<void> {
     if (/^\/master\//.test(pathname)) return html(withSimulator(read('master.html')));
     if (/^\/shop\/mywants/.test(pathname)) return html(wantlisterPage());
     if (/^\/settings\/notifications/.test(pathname)) return html(read('settings-notifications.html'));
+    if (/^\/shop\/item\//.test(pathname)) return html(withSimulator(read('shop-item.html')));
     if (/^\/mywantlist/.test(pathname)) {
       const big = new URL(route.request().url()).searchParams.get('layout') === 'big';
       return html(read(big ? 'wantlist-cards.html' : 'wantlist.html'));

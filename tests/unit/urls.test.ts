@@ -21,6 +21,7 @@ describe('parseDiscogsPage', () => {
     ['/de/shop/mywants', { kind: 'wantlister' }],
     ['/settings/notifications', { kind: 'notification-settings' }],
     ['/mywantlist', { kind: 'wantlist' }],
+    ['/shop/item/4105611609', { kind: 'shop-item', listingId: 4105611609 }],
     ['/de/mywantlist', { kind: 'wantlist' }],
   ])('recognises %s', (path, expected) => {
     expect(parseDiscogsPage(path)).toEqual(expected);

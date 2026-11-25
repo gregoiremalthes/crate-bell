@@ -44,6 +44,12 @@ Observed on the live site on 2026-11-24, logged in, English UI. When something h
 - Layouts, remembered per account by Discogs (`?layout=med|sm|big`): "Text With Covers" (`med`, default) and "Text Only" (`sm`) are a table with rows `tr.wantlist_r{releaseId}`, a checkbox `input[name="cw_releases"][value={id}]`, and `td.artist_title` holding `.release_title a[href*="/artist/"]` and `.release_title_link a` (title). The large cards layout (`big`) is `ul#wantlist > li.card[data-object-type="release"][data-object-id]` with `a.search_result_title` and `.card-artist-name a`.
 - The artist/title cell is clickable (`data-followable`): it opens the record.
 
+## Marketplace listing `/shop/item/{listingId}` (also `/sell/item/…`)
+
+- Newer "hifi" React layout. The wantlist toggle is `button.hifi-wantlist-button-toggle`, text "Add to Wantlist" or "In Wantlist", inside `div.flex.items-center.gap-2` under the green "Add to Cart" button.
+- Title and artist are `a.hifi-heading-link`; the title link points to `/release/{id}-{slug}`, which gives the release id.
+- Buttons here are 36px high, flat `#eee` fill, 4px corners, medium weight (release pages: 38px, `#f5f4ec` fill, 1px `#cecdc6` frame).
+
 ## Notification settings `/settings/notifications`
 
 - Server-rendered form (`POST /settings/notifications`), readable with a same-origin `fetch`.

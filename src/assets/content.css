@@ -356,3 +356,341 @@
   width: 18px;
   height: 18px;
 }
+
+/* =====================================================================
+ * Discogs-native look for everything shown inside Discogs' pages.
+ * Matches Discogs' own buttons (38px, 14px Helvetica, light fill, 1px frame,
+ * 4px corners). Pink appears only on hover, focus, the guide ring and the
+ * small brand dot. The Highlighter look stays in the popup and guide page.
+ * ===================================================================== */
+:host {
+  --d-fill: #f5f4ec;
+  --d-frame: #cecdc6;
+  --d-ink: #31312f;
+  --d-muted: #6b6a65;
+  --d-font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.cb-root {
+  font-family: var(--d-font);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: normal;
+  color: var(--d-ink);
+}
+
+.cb-btn,
+.cb-btn--primary,
+.cb-btn--secondary {
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--d-frame);
+  border-radius: 4px;
+  background: var(--d-fill);
+  color: var(--d-ink);
+  font: 400 14px / 20px var(--d-font);
+  letter-spacing: normal;
+  text-decoration: none;
+}
+.cb-btn:hover,
+.cb-btn--primary:hover,
+.cb-btn--secondary:hover {
+  background: var(--pink);
+  border-color: var(--pink-strong);
+  color: #000;
+}
+.cb-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cb-btn--ghost:hover {
+  background: var(--pink-soft);
+  border-color: transparent;
+}
+.cb-btn--sm {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.cb-btn .cb-icon {
+  width: 18px;
+  height: 18px;
+}
+.cb-btn:focus-visible,
+.cb-link:focus-visible,
+.cb-chip:focus-visible {
+  outline: 2px solid var(--pink-strong);
+  outline-offset: 2px;
+}
+.cb-btn[aria-busy="true"],
+.cb-btn[aria-disabled="true"] {
+  background: var(--d-fill);
+  border: 1px dashed var(--d-frame);
+  color: var(--d-muted);
+}
+.cb-link {
+  color: var(--d-ink);
+  font-family: var(--d-font);
+}
+.cb-link:hover {
+  background: none;
+  color: #000;
+  text-decoration-color: var(--pink-strong);
+}
+
+/* Record page and shop listing */
+.cb-release {
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+.cb-release__help,
+.cb-release__footer {
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--d-muted);
+}
+.cb-brand::before {
+  width: 8px;
+  height: 8px;
+  border-width: 1px;
+}
+.cb-nudge {
+  animation: none;
+  background: var(--pink-soft);
+  border-color: var(--pink-strong);
+}
+
+.cb-alert-status {
+  gap: 2px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--d-frame);
+  border-radius: 4px;
+}
+.cb-alert-status--paused {
+  background: #fff;
+  border-color: var(--d-frame);
+  border-left: 3px solid var(--amber-ink);
+}
+.cb-alert-status__title {
+  font: 700 14px / 20px var(--d-font);
+  font-variation-settings: normal;
+}
+.cb-alert-status__title .cb-icon {
+  width: 16px;
+  height: 16px;
+}
+.cb-alert-status__text {
+  font-size: 13px;
+  line-height: 18px;
+}
+.cb-small {
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.cb-notice {
+  padding: 8px 10px;
+  border-left-width: 3px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.cb-notice .cb-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Album (master) card */
+.cb-card {
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--d-frame);
+  border-radius: 4px;
+}
+.cb-card__head .cb-disc {
+  width: 32px;
+  height: 32px;
+  background: var(--d-fill);
+  border: 1px solid var(--d-frame);
+}
+.cb-card__title {
+  font: 700 15px / 20px var(--d-font);
+  font-variation-settings: normal;
+}
+.cb-card__body,
+.cb-step__text {
+  font-size: 13px;
+  line-height: 18px;
+}
+.cb-card__label,
+.cb-step__title {
+  font-size: 13px;
+  font-weight: 700;
+}
+.cb-step {
+  grid-template-columns: 24px 1fr;
+  gap: 10px;
+}
+.cb-step__num {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--d-frame);
+  font: 700 12px / 1 var(--d-font);
+}
+.cb-step--current .cb-step__num {
+  background: var(--d-ink);
+  border-color: var(--d-ink);
+  color: #fff;
+}
+.cb-chip {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--d-frame);
+  border-radius: 4px;
+  font: 400 13px / 18px var(--d-font);
+}
+.cb-chip[aria-pressed="true"] {
+  background: var(--d-fill);
+  border-color: var(--d-ink);
+}
+.cb-chip:hover,
+.cb-chip[aria-pressed="true"]:hover {
+  background: var(--pink);
+}
+
+/* Guide panel on "Items I Want" */
+.cb-coach {
+  width: min(360px, calc(100vw - 32px));
+  border: 1px solid var(--d-frame);
+  border-radius: 4px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+}
+.cb-coach__bar {
+  min-height: 44px;
+  padding: 4px 4px 4px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--d-frame);
+  font: 700 13px / 18px var(--d-font);
+  font-variation-settings: normal;
+  color: var(--d-ink);
+}
+.cb-coach__bar .cb-disc {
+  width: 20px;
+  height: 20px;
+}
+.cb-coach__bar .cb-disc .cb-icon {
+  width: 14px;
+  height: 14px;
+}
+.cb-coach__bar .cb-btn {
+  min-height: 36px;
+  width: 36px;
+  background: transparent;
+  border-color: transparent;
+}
+.cb-coach__bar .cb-btn:hover {
+  background: var(--pink-soft);
+}
+.cb-coach__content {
+  gap: 12px;
+  padding: 14px;
+}
+.cb-coach__title {
+  font: 700 17px / 22px var(--d-font);
+  font-variation-settings: normal;
+}
+.cb-coach__title:focus {
+  outline: none;
+}
+.cb-coach__text {
+  font-size: 14px;
+  line-height: 20px;
+}
+.cb-coach__coffee {
+  font-size: 13px;
+}
+.cb-pill {
+  min-height: 38px;
+  padding: 0 12px 0 8px;
+  border: 1px solid var(--d-frame);
+  border-radius: 4px;
+  background: #fff;
+  font: 400 14px / 20px var(--d-font);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+.cb-pill:hover {
+  background: var(--pink);
+}
+.cb-pill .cb-disc {
+  width: 20px;
+  height: 20px;
+}
+.cb-pill .cb-disc .cb-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Wantlist page */
+.cb-row {
+  margin: 0;
+}
+.cb-row .cb-btn {
+  min-height: 30px;
+  padding: 4px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.cb-row .cb-icon {
+  width: 16px;
+  height: 16px;
+}
+.cb-row--card {
+  margin-top: 6px;
+}
+.cb-tag {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--d-frame);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--d-ink);
+  font: 400 13px / 18px var(--d-font);
+}
+.cb-tag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--pink-strong);
+}
+.cb-tag .cb-icon {
+  display: none;
+}
+
+/* Settings page hint */
+.cb-settings-hint {
+  background: #fff;
+  border: 1px solid var(--d-frame);
+  border-left: 3px solid var(--pink-strong);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* Marketplace listing: Discogs' newer buttons are flat grey, 36px, medium weight. */
+.cb-release--shop {
+  margin-top: 0;
+}
+.cb-release--shop .cb-btn {
+  min-height: 36px;
+  background: #eee;
+  border-color: transparent;
+  color: #121212;
+  font-weight: 500;
+}
+.cb-release--shop .cb-btn:hover {
+  background: var(--pink);
+  border-color: transparent;
+}

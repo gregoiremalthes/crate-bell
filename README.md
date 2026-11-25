@@ -15,7 +15,7 @@ Discogs already sends these emails, but setting one up takes a hidden setting, a
 - **Your usual filters, set once:** condition, sleeve, generic sleeves, seller rating, ships from.
 - English, French, German. No account, no ads, no tracking. Not affiliated with Discogs.
 
-Website: <https://gregoiremalthes.github.io/crate-bell/> · Privacy: [PRIVACY.md](PRIVACY.md) · Support the project: <https://ko-fi.com/gregoirep>
+Website: <https://gregoiremalthes.github.io/crate-bell/> · Feedback: <https://forms.gle/gs8Y3k1JSijNJEuB6> · Privacy: [PRIVACY.md](PRIVACY.md) · Support the project: <https://ko-fi.com/gregoirep>
 
 ## Install
 

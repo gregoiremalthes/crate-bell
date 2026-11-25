@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.0 (unreleased)
+
+- Buttons on Discogs now look like Discogs' own: same size, square corners, neutral colours, pink only on hover. The guide page keeps the Highlighter look.
+- "Set a sale alert" on marketplace listings (`/shop/item/…`), under Discogs' wantlist button.
+- Wantlist page: the "Set alert" button and "Alert on" tag sit on the right of the Artist - Title cell.
+- Guide page: "What Crate Bell shows on Discogs" (switches and links) comes before the filters, and "Your usual filters" folds away once set, showing a one-line summary.
+- Feedback form linked from the guide page, the popup and the goodbye page.
+- Goodbye page opens when Crate Bell is removed.
+
 ## 1.2.0 (unreleased)
 
 - Switches on the guide page to turn off record page buttons, wantlist buttons, album cards or the alert page guide.

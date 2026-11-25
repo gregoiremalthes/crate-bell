@@ -96,13 +96,77 @@ export async function mountQuickPrefs(container: HTMLElement): Promise<void> {
   );
 }
 
-/** Full form for the guide page. */
-export async function mountFullPrefs(container: HTMLElement): Promise<void> {
+/** Switches for each part of Crate Bell shown on Discogs. */
+export async function mountFeatureToggles(container: HTMLElement): Promise<void> {
   const prefs = await getPrefs();
   const saved = savedNotice();
   const save = async (patch: Partial<Prefs>) => {
     Object.assign(prefs, await updatePrefs(patch));
     saved.flash();
+  };
+  const toggle = (key: keyof Prefs['features'], label: string, help: string) =>
+    h(
+      'label',
+      { class: 'cb-choice cb-choice--soft' },
+      h('input', {
+        type: 'checkbox',
+        checked: prefs.features[key],
+        on: {
+          change: (e) => save({ features: { ...prefs.features, [key]: (e.target as HTMLInputElement).checked } }),
+        },
+      }),
+      h('span', null, h('span', { class: 'cb-choice__title' }, label), h('span', { class: 'cb-choice__text' }, help)),
+    );
+
+  container.append(
+    h(
+      'fieldset',
+      { class: 'cb-choices', id: 'features' },
+      h('legend', { class: 'cb-visually-hidden' }, t('featuresTitle')),
+      toggle('release', t('featureRelease'), t('featureReleaseText')),
+      toggle('wantlist', t('featureWantlist'), t('featureWantlistText')),
+      toggle('master', t('featureMaster'), t('featureMasterText')),
+      toggle('guide', t('featureGuide'), t('featureGuideText')),
+      h('p', { class: 'cb-small cb-muted' }, t('featuresNote')),
+    ),
+    saved.el,
+  );
+}
+
+/** One line describing the usual filters, shown when the section is folded. */
+export function summarizeFilters(prefs: Prefs): string {
+  const parts = [prefs.frequency === 'digest' ? t('frequencyDigest') : t('frequencyRealtime')];
+  if (prefs.minMediaCondition !== 'any') parts.push(`${t('prefsMedia')}: ${prefs.minMediaCondition}+`);
+  if (prefs.minSleeveCondition !== 'any') parts.push(`${t('prefsSleeve')}: ${prefs.minSleeveCondition}+`);
+  if (prefs.hideGenericSleeves) parts.push(t('prefsHideGeneric'));
+  if (prefs.minSellerRating > 0) parts.push(`${t('prefsSellerRating')}: ${prefs.minSellerRating}%`);
+  if (prefs.shipsFrom.length) {
+    const list = prefs.shipsFrom.length > 3 ? `${prefs.shipsFrom.slice(0, 3).join(', ')}…` : prefs.shipsFrom.join(', ');
+    parts.push(`${t('prefsShipsFrom')}: ${list}`);
+  }
+  return parts.join(' · ');
+}
+
+/** True once the user changed anything from the defaults. */
+export function hasCustomFilters(prefs: Prefs): boolean {
+  return (
+    prefs.frequency !== 'realtime' ||
+    prefs.minMediaCondition !== 'any' ||
+    prefs.minSleeveCondition !== 'any' ||
+    prefs.hideGenericSleeves ||
+    prefs.minSellerRating > 0 ||
+    prefs.shipsFrom.length > 0
+  );
+}
+
+/** Full filters form for the guide page. */
+export async function mountFullPrefs(container: HTMLElement, onChange?: (prefs: Prefs) => void): Promise<void> {
+  const prefs = await getPrefs();
+  const saved = savedNotice();
+  const save = async (patch: Partial<Prefs>) => {
+    Object.assign(prefs, await updatePrefs(patch));
+    saved.flash();
+    onChange?.(prefs);
   };
 
   const countries = new Set(prefs.shipsFrom);
@@ -136,31 +200,7 @@ export async function mountFullPrefs(container: HTMLElement): Promise<void> {
     void save({ shipsFrom: [...countries] });
   };
 
-  const toggle = (key: keyof Prefs['features'], label: string, help: string) =>
-    h(
-      'label',
-      { class: 'cb-choice cb-choice--soft' },
-      h('input', {
-        type: 'checkbox',
-        checked: prefs.features[key],
-        on: {
-          change: (e) => save({ features: { ...prefs.features, [key]: (e.target as HTMLInputElement).checked } }),
-        },
-      }),
-      h('span', null, h('span', { class: 'cb-choice__title' }, label), h('span', { class: 'cb-choice__text' }, help)),
-    );
-
   container.append(
-    h(
-      'fieldset',
-      { class: 'cb-choices', id: 'features' },
-      h('legend', null, t('featuresTitle')),
-      toggle('release', t('featureRelease'), t('featureReleaseText')),
-      toggle('wantlist', t('featureWantlist'), t('featureWantlistText')),
-      toggle('master', t('featureMaster'), t('featureMasterText')),
-      toggle('guide', t('featureGuide'), t('featureGuideText')),
-      h('p', { class: 'cb-small cb-muted' }, t('featuresNote')),
-    ),
     frequencyFieldset(prefs, save),
     conditionSelect('pref-media', t('prefsMedia'), prefs.minMediaCondition, (v) => save({ minMediaCondition: v })),
     conditionSelect('pref-sleeve', t('prefsSleeve'), prefs.minSleeveCondition, (v) => save({ minSleeveCondition: v })),

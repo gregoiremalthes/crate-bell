@@ -51,6 +51,9 @@ Large buttons, plain words, step-by-step guidance, in English, French and German
 PRIVATE BY DESIGN
 No account, no ads, no analytics. Crate Bell only talks to Discogs, with your own session. Your preferences stay on your computer. Open source: https://github.com/gregoiremalthes/crate-bell
 
+FEEDBACK
+Ideas or problems? Tell me here: https://forms.gle/gs8Y3k1JSijNJEuB6
+
 FREE
 Crate Bell is free. If it saves you time, you can buy me a coffee: https://ko-fi.com/gregoirep
 

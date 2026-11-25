@@ -15,6 +15,7 @@
           <a href="#email" data-i18n="navEmail"></a>
           <a href="#how" data-i18n="navHow"></a>
           <a href="#remove" data-i18n="navRemove"></a>
+          <a href="#on-discogs" data-i18n="navDiscogs"></a>
           <a href="#preferences" data-i18n="navPreferences"></a>
           <a href="#faq" data-i18n="navFaq"></a>
         </nav>
@@ -139,15 +140,29 @@
       </section>
 
       <!-- Preferences -->
-      <section id="preferences" class="chapter" aria-labelledby="prefs-h">
+      <section id="on-discogs" class="chapter" aria-labelledby="discogs-h">
         <p class="overline" data-i18n="prefsOverline"></p>
-        <h2 class="title-1" id="prefs-h" data-i18n="prefsChapterTitle"></h2>
-        <p data-i18n="prefsChapterText"></p>
+        <h2 class="title-1" id="discogs-h" data-i18n="featuresTitle"></h2>
+        <p data-i18n="onDiscogsText"></p>
         <div class="quick-links">
           <a class="cb-btn cb-btn--secondary cb-btn--sm" id="link-saved" target="_blank" rel="noopener" data-i18n="linkSavedSearches"></a>
           <a class="cb-btn cb-btn--secondary cb-btn--sm" id="link-wantlist" target="_blank" rel="noopener" data-i18n="linkWantlist"></a>
         </div>
-        <div class="prefs" id="prefs"></div>
+        <div class="prefs" id="features"></div>
+      </section>
+
+      <section id="preferences" class="chapter">
+        <details class="fold" id="filters-fold">
+          <summary>
+            <span class="fold__head">
+              <span class="title-1" data-i18n="prefsChapterTitle"></span>
+              <span class="fold__toggle" aria-hidden="true"></span>
+            </span>
+            <span class="fold__summary cb-small cb-muted" id="filters-summary"></span>
+          </summary>
+          <p data-i18n="prefsChapterText"></p>
+          <div class="prefs" id="prefs"></div>
+        </details>
       </section>
 
       <!-- FAQ -->
@@ -165,12 +180,15 @@
         <span class="cb-disc cb-disc--md" id="coffee-disc"></span>
         <h2 class="title-2" id="coffee-h" data-i18n="coffeeTitle"></h2>
         <p data-i18n="coffeeText"></p>
-        <a class="cb-btn cb-btn--primary" id="coffee" target="_blank" rel="noopener" data-i18n="coffeeLink"></a>
+        <div class="quick-links quick-links--center">
+          <a class="cb-btn cb-btn--primary" id="coffee" target="_blank" rel="noopener" data-i18n="coffeeLink"></a>
+          <a class="cb-btn cb-btn--secondary" id="feedback" target="_blank" rel="noopener" data-i18n="feedbackLink"></a>
+        </div>
       </section>
     </main>
 
     <footer class="foot">
-      <p class="cb-small"><span data-i18n="notAffiliated"></span> · <a id="privacy" target="_blank" rel="noopener" data-i18n="privacyLink"></a> · <a id="source" target="_blank" rel="noopener" data-i18n="sourceLink"></a></p>
+      <p class="cb-small"><span data-i18n="notAffiliated"></span> · <a id="privacy" target="_blank" rel="noopener" data-i18n="privacyLink"></a> · <a id="source" target="_blank" rel="noopener" data-i18n="sourceLink"></a> · <a id="feedback-foot" target="_blank" rel="noopener" data-i18n="feedbackLink"></a></p>
     </footer>
     <script type="module" src="./main.ts"></script>
   </body>

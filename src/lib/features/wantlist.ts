@@ -58,6 +58,12 @@ export async function initWantlistPage(ctx: ContentScriptContext): Promise<void>
       shadow.adoptedStyleSheets = [sheet];
       const root = h('div');
       shadow.appendChild(root);
+      if (item.layout === 'table') {
+        // On the right-hand side of the Artist - Title cell, vertically centred.
+        item.anchor.style.position = 'relative';
+        item.anchor.style.paddingRight = '132px';
+        Object.assign(host.style, { position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)' });
+      }
       item.anchor.appendChild(host);
       mounted.set(item.element, { item, root });
       renderItem(item, root);

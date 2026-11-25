@@ -3,9 +3,15 @@ import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 import { buildAlertName } from '../alert-name';
 import {
   findReleaseAnchor,
+  findShopItemAnchor,
+  findShopWantlistButton,
   findWantlistButton,
   isLoggedOut,
+  type RecordInfo,
   readRecordInfo,
+  readShopItemInfo,
+  readShopItemReleaseId,
+  readShopWantlistState,
   readWantlistState,
   type WantlistState,
 } from '../discogs/selectors';
@@ -32,7 +38,46 @@ type View =
   | { name: 'add-failed' }
   | { name: 'opening' };
 
-/** The pink button under Discogs' "Add to Wantlist" button on every release page. */
+/** How the card reads a page that shows one record with Discogs' wantlist toggle. */
+interface RecordPage {
+  findButton: () => HTMLButtonElement | null;
+  readState: () => WantlistState;
+  readInfo: () => RecordInfo;
+  /** Extra class to match the look of the page's own buttons. */
+  variant?: string;
+}
+
+const RELEASE_PAGE: RecordPage = {
+  findButton: () => findWantlistButton(),
+  readState: () => readWantlistState(),
+  readInfo: () => readRecordInfo('release'),
+};
+
+const SHOP_ITEM_PAGE: RecordPage = {
+  findButton: () => findShopWantlistButton(),
+  readState: () => readShopWantlistState(),
+  readInfo: () => readShopItemInfo(),
+  variant: 'cb-release--shop',
+};
+
+/** The alert button under Discogs' wantlist toggle on a marketplace listing (/shop/item/…). */
+export async function initShopItemPage(ctx: ContentScriptContext): Promise<void> {
+  const button = await waitFor(() => findShopWantlistButton(), 10_000);
+  const releaseId = readShopItemReleaseId();
+  if (!button || !releaseId) return;
+  const ui = await createShadowRootUi(ctx, {
+    name: 'crate-bell-release',
+    position: 'inline',
+    anchor: () => findShopItemAnchor() ?? document.body,
+    append: 'after',
+    isolateEvents: true,
+    onMount: (container) => new ReleaseCard(container, releaseId, false, SHOP_ITEM_PAGE),
+    onRemove: (card) => card?.destroy(),
+  });
+  keepMounted(ctx, ui, findShopItemAnchor);
+}
+
+/** The alert button under Discogs' "Add to Wantlist" button on every release page. */
 export async function initReleasePage(ctx: ContentScriptContext, releaseId: number): Promise<void> {
   // Discogs' buttons appear after the page hydrates: wait for them before using a fallback place.
   await waitFor(() => findWantlistButton(), 8_000);
@@ -45,7 +90,7 @@ export async function initReleasePage(ctx: ContentScriptContext, releaseId: numb
     anchor: floating ? document.body : () => findReleaseAnchor() ?? document.body,
     append: floating ? 'last' : 'after',
     isolateEvents: true,
-    onMount: (container) => new ReleaseCard(container, releaseId, floating),
+    onMount: (container) => new ReleaseCard(container, releaseId, floating, RELEASE_PAGE),
     onRemove: (card) => card?.destroy(),
   });
   keepMounted(ctx, ui, () => (floating ? document.body : findReleaseAnchor()), floating ? 'last' : 'after');
@@ -66,13 +111,14 @@ class ReleaseCard {
     container: HTMLElement,
     private releaseId: number,
     floating: boolean,
+    private page: RecordPage,
   ) {
     this.root = h('section', {
-      class: `cb-root cb-release${floating ? ' cb-floating' : ''}`,
+      class: `cb-root cb-release${floating ? ' cb-floating' : ''} ${page.variant ?? ''}`,
       'aria-label': t('appName'),
     });
     container.appendChild(this.root);
-    this.lastState = readWantlistState();
+    this.lastState = this.page.readState();
     this.view = this.viewFor(this.lastState, false);
     this.render();
 
@@ -90,7 +136,7 @@ class ReleaseCard {
     // Coming back with the browser's Back button can restore the page as it was ("Opening…").
     const onPageShow = (event: PageTransitionEvent) => {
       if (!event.persisted) return;
-      this.lastState = readWantlistState();
+      this.lastState = this.page.readState();
       this.setView(this.viewFor(this.lastState, false));
     };
     window.addEventListener('pageshow', onPageShow);
@@ -129,7 +175,7 @@ class ReleaseCard {
 
   private syncWithDiscogs(): void {
     if (this.view.name === 'adding' || this.view.name === 'opening') return;
-    const state = readWantlistState();
+    const state = this.page.readState();
     if (state === this.lastState) return;
     const justAdded = this.lastState === 'not-in-wantlist' && state === 'in-wantlist';
     this.lastState = state;
@@ -139,14 +185,14 @@ class ReleaseCard {
 
   private async onPrimaryClick(): Promise<void> {
     if (this.view.name === 'add' || this.view.name === 'add-failed') {
-      const button = findWantlistButton();
+      const button = this.page.findButton();
       if (!button) return this.setView({ name: 'add-failed' });
       this.setView({ name: 'adding' });
       button.click();
-      const added = await waitFor(() => readWantlistState() === 'in-wantlist', 8_000);
+      const added = await waitFor(() => this.page.readState() === 'in-wantlist', 8_000);
       // Discogs updates its button before its server confirms: give it a moment to undo a failure.
       if (added) await sleep(1_200);
-      this.lastState = readWantlistState();
+      this.lastState = this.page.readState();
       if (this.lastState !== 'in-wantlist') {
         this.setView({ name: 'add-failed' });
         return;
@@ -158,7 +204,7 @@ class ReleaseCard {
   private async openAlertPage(): Promise<void> {
     this.setView({ name: 'opening' });
     const prefs = await getPrefs();
-    const info = readRecordInfo('release');
+    const info = this.page.readInfo();
     const { url, releaseIds } = buildWantlisterUrl([this.releaseId], prefs);
     await savePendingAlert({
       kind: 'release',
@@ -243,12 +289,12 @@ class ReleaseCard {
                 on: {
                   click: () => {
                     if (busy) return;
-                    const button = findWantlistButton();
+                    const button = this.page.findButton();
                     if (!button) return;
                     this.setView({ name: 'adding' });
                     button.click();
-                    void waitFor(() => readWantlistState() === 'in-wantlist', 8_000).then(() => {
-                      this.lastState = readWantlistState();
+                    void waitFor(() => this.page.readState() === 'in-wantlist', 8_000).then(() => {
+                      this.lastState = this.page.readState();
                       this.setView(this.viewFor(this.lastState, false));
                     });
                   },

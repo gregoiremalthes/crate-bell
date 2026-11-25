@@ -236,3 +236,28 @@ test('features can be switched off from the guide page', async ({ page, extensio
   await page.goto('https://www.discogs.com/release/3235-Daft-Punk-Homework');
   await expect(card(page).getByRole('button', { name: "Alert me when it's for sale" })).toBeVisible();
 });
+
+test("marketplace listing: the same button, under Discogs' wantlist toggle", async ({ page }) => {
+  await page.goto('https://www.discogs.com/shop/item/894306969');
+  const host = page.locator('div.flex.items-center.gap-2 + crate-bell-release');
+  await expect(host).toHaveCount(1);
+  await host.getByRole('button', { name: "Alert me when it's for sale" }).click();
+  await page.waitForURL(/\/shop\/mywants\/\?release=3235$/);
+  await coach(page).getByRole('button', { name: 'Open the save form' }).click();
+  await expect(page.locator('#save-search-name')).toHaveValue('Daft Punk - Homework');
+});
+
+test('usual filters fold away once filled in', async ({ page, extensionId }) => {
+  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.getByLabel('Record condition').selectOption('VG+');
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('Record condition')).toBeHidden();
+  await expect(page.locator('#filters-summary')).toContainText('Record condition: VG+');
+  await page.locator('#filters-fold > summary').click();
+  await expect(page.getByLabel('Record condition')).toHaveValue('VG+');
+  await expect(page.getByRole('link', { name: 'Send feedback' }).first()).toHaveAttribute(
+    'href',
+    'https://forms.gle/gs8Y3k1JSijNJEuB6',
+  );
+});

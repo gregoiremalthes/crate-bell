@@ -12,6 +12,7 @@ export type DiscogsPage =
   | { kind: 'master'; id: number }
   | { kind: 'wantlister' }
   | { kind: 'wantlist' }
+  | { kind: 'shop-item'; listingId: number }
   | { kind: 'notification-settings' }
   | { kind: 'other' };
 
@@ -22,6 +23,7 @@ const MASTER_RE = new RegExp(`^${LOCALE}/master/(\\d+)(?:[-/]|$)`);
 const WANTLISTER_RE = new RegExp(`^${LOCALE}/shop/mywants/?$`);
 const SETTINGS_RE = new RegExp(`^${LOCALE}/settings/notifications/?$`);
 const WANTLIST_RE = new RegExp(`^${LOCALE}/mywantlist/?$`);
+const SHOP_ITEM_RE = new RegExp(`^${LOCALE}/(?:shop|sell)/item/(\\d+)(?:[-/]|$)`);
 
 export function parseDiscogsPage(pathname: string): DiscogsPage {
   const release = RELEASE_RE.exec(pathname);
@@ -31,6 +33,8 @@ export function parseDiscogsPage(pathname: string): DiscogsPage {
   if (WANTLISTER_RE.test(pathname)) return { kind: 'wantlister' };
   if (SETTINGS_RE.test(pathname)) return { kind: 'notification-settings' };
   if (WANTLIST_RE.test(pathname)) return { kind: 'wantlist' };
+  const item = SHOP_ITEM_RE.exec(pathname);
+  if (item) return { kind: 'shop-item', listingId: Number(item[1]) };
   return { kind: 'other' };
 }
 
