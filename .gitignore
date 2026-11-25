@@ -1,0 +1,13 @@
+node_modules
+.output
+.wxt
+web-ext.config.ts
+*.log
+.DS_Store
+test-results
+playwright-report
+coverage
+.env
+.env.*
+public/_locales
+store-assets/raw/*.tmp

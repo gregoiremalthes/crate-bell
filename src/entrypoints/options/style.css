@@ -1,0 +1,393 @@
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 10;
+  padding: 8px 12px;
+  background: var(--paper);
+  border: var(--stroke-2) solid var(--line);
+}
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--paper);
+  border-bottom: 2px solid var(--pink);
+}
+.top__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  align-items: center;
+  justify-content: space-between;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-24);
+}
+.cb-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: 22px;
+  line-height: 28px;
+}
+.top__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  font-size: 15px;
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 var(--space-24) var(--space-64, 64px);
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.overline {
+  font: 400 15px / 20px var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.display {
+  font-size: 45px;
+  line-height: 54px;
+  text-align: center;
+}
+.title-1 {
+  font-size: 30px;
+  line-height: 38px;
+}
+.title-2 {
+  font-size: 22px;
+  line-height: 28px;
+}
+.title-3 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-variation-settings: normal;
+  font-size: 18px;
+  line-height: 26px;
+}
+.lead {
+  font-size: 20px;
+  line-height: 30px;
+  text-align: center;
+}
+
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-16);
+  padding: var(--space-48) 0 var(--space-32);
+  text-align: center;
+}
+
+.chapter {
+  display: grid;
+  gap: var(--space-16);
+  padding: var(--space-48) 0 var(--space-16);
+  border-top: 2px solid var(--pink);
+  scroll-margin-top: 72px;
+}
+
+.panel {
+  padding: var(--space-16);
+  border: var(--stroke-2) solid var(--line);
+}
+
+/* ---------- Simplified drawings of Discogs pages ---------- */
+.mock {
+  margin: 0;
+  display: grid;
+  gap: var(--space-8);
+}
+.mock figcaption {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+.mock__frame {
+  border: var(--stroke-2) solid var(--line);
+  background: var(--paper);
+  font-size: 14px;
+  line-height: 20px;
+}
+.mock__url {
+  padding: 6px 12px;
+  border-bottom: 1.5px solid var(--line);
+  background: #f7f5f6;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.mock__table {
+  display: grid;
+  padding: 8px 12px 12px;
+}
+.mock__row {
+  display: grid;
+  grid-template-columns: 96px 96px 1fr;
+  align-items: center;
+  min-height: 36px;
+  border-bottom: 1px solid var(--hairline);
+}
+.mock__row > span:nth-child(-n + 2) {
+  text-align: center;
+}
+.mock__row--head {
+  font-weight: 500;
+  font-size: 13px;
+}
+.mock__row--hl {
+  background: var(--pink-soft);
+  outline: 3px solid var(--pink-strong);
+  outline-offset: -1px;
+}
+.mock__box {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 3px;
+  vertical-align: middle;
+}
+.mock__box--on {
+  background:
+    var(--ink)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")
+    center / 12px no-repeat;
+}
+
+.tutorial {
+  display: grid;
+  gap: var(--space-24);
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tutorial__step {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-24);
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .tutorial__step {
+    grid-template-columns: 1fr;
+  }
+}
+.num {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  border-radius: 9999px;
+  background: var(--pink);
+  font: 300 16px / 1 var(--font-serif);
+}
+.mock__aside {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+.mock__btn {
+  display: grid;
+  place-items: center;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1.5px solid #b9b3b6;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.mock__btn--pink {
+  min-height: 40px;
+  background: var(--pink);
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  text-decoration: underline;
+}
+.mock__btn--dark {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+.mock__btn--ring {
+  outline: 3px solid var(--pink-strong);
+  outline-offset: 3px;
+}
+.mock__chip {
+  justify-self: start;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  background: #ececec;
+  font-size: 12px;
+}
+.mock__line {
+  height: 10px;
+  background: var(--hairline);
+}
+.mock__line--short {
+  width: 60%;
+}
+.mock__input {
+  padding: 6px 10px;
+  border: 1.5px solid #b9b3b6;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.mock__radio {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.mock__dot {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 9999px;
+}
+.mock__dot--on {
+  background: radial-gradient(circle, #000 0 4px, transparent 4.5px);
+}
+
+.callout {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-16);
+  padding: var(--space-32) var(--space-24);
+  background: var(--pink);
+  text-align: center;
+}
+.callout .cb-disc {
+  background: var(--paper);
+  border: var(--stroke-2) solid var(--line);
+}
+.callout .cb-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.numbered {
+  display: grid;
+  gap: var(--space-8);
+  margin: 0;
+  padding-left: 1.4em;
+}
+.note {
+  padding: var(--space-12) var(--space-16);
+  border-left: 4px solid var(--pink-strong);
+  background: var(--pink-soft);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.prefs {
+  display: grid;
+  gap: var(--space-24);
+  font-size: 16px;
+  line-height: 24px;
+}
+.cb-countries {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0 var(--space-16);
+}
+
+#faq details {
+  border-bottom: 1px solid var(--hairline);
+  padding: var(--space-12) 0;
+}
+#faq summary {
+  cursor: pointer;
+  font-weight: 500;
+  min-height: 32px;
+}
+#faq summary:focus-visible {
+  outline: var(--stroke-2) solid var(--focus);
+  outline-offset: 2px;
+}
+#faq details p {
+  margin-top: var(--space-8);
+}
+
+.coffee {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-48);
+  padding: var(--space-32) var(--space-24);
+  border: var(--stroke-2) solid var(--line);
+  text-align: center;
+}
+.coffee .cb-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.foot {
+  padding: var(--space-24);
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.quick-links--center {
+  justify-content: center;
+}
+.fold > summary {
+  display: grid;
+  gap: var(--space-4);
+  list-style: none;
+  cursor: pointer;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary:focus-visible {
+  outline: var(--stroke-2) solid var(--focus);
+  outline-offset: 4px;
+}
+.fold__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+.fold__toggle {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: var(--stroke-2) solid var(--line);
+  border-radius: 9999px;
+  background: var(--paper)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E")
+    center no-repeat;
+}
+.fold[open] .fold__toggle {
+  transform: rotate(180deg);
+}
+.fold > summary:hover .fold__toggle {
+  background-color: var(--pink-soft);
+}
+.fold[open] .fold__summary {
+  display: none;
+}
+.fold[open] > summary + p {
+  margin: var(--space-16) 0;
+}

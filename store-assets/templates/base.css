@@ -1,0 +1,12 @@
+@font-face { font-family: 'Fraunces'; font-weight: 100 900; src: url('../../public/fonts/fraunces-soft.woff2') format('woff2'); }
+@font-face { font-family: 'DM Sans'; font-weight: 100 1000; src: url('../../public/fonts/dm-sans.woff2') format('woff2'); }
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1280px; height: 800px; overflow: hidden; background: #fff; font-family: 'DM Sans', sans-serif; color: #000; -webkit-font-smoothing: antialiased; }
+h1 { font: 300 54px/62px 'Fraunces', serif; font-variation-settings: 'SOFT' 100; }
+p { font-size: 24px; line-height: 34px; }
+.pink { background: #f69cc6; }
+.brand { display: flex; align-items: center; gap: 12px; font: 300 26px/32px 'Fraunces', serif; font-variation-settings: 'SOFT' 100; }
+.brand img { width: 48px; height: 48px; }
+.frame { border: 2px solid #000; background: #fff; overflow: hidden; }
+.frame img { display: block; width: 100%; }
+.rule { height: 3px; background: #000; width: 64px; }

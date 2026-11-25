@@ -1,0 +1,56 @@
+body {
+  width: 360px;
+}
+.popup {
+  display: grid;
+}
+.popup__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  background: var(--pink);
+  color: var(--on-pink);
+}
+.popup__bar .cb-disc {
+  background: var(--paper);
+  border: var(--stroke-2) solid var(--line);
+}
+.popup__title {
+  font-size: 22px;
+  line-height: 28px;
+}
+.popup__section {
+  display: grid;
+  gap: var(--space-12);
+  padding: var(--space-16);
+}
+.popup__h2 {
+  font-size: 19px;
+  line-height: 25px;
+}
+.popup__prefs {
+  display: grid;
+  gap: var(--space-16);
+}
+.popup__help {
+  grid-template-columns: 1fr 1fr;
+}
+.popup__help .cb-btn {
+  padding: 0 var(--space-8);
+}
+.popup__footer {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-16) var(--space-16);
+  border-top: 1px solid var(--hairline);
+}
+.popup__coffee {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-weight: 500;
+}
+.cb-rule {
+  margin: 0 var(--space-16);
+}

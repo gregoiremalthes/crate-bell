@@ -1,0 +1,279 @@
+/*
+ * Highlighter design system, as used by Crate Bell.
+ * Tokens copied from the Highlighter system (light theme). Paper white, one highlighter pink,
+ * black ink. Square surfaces, 8px controls, 2px black strokes, no shadows, no gradients.
+ */
+:root,
+:host {
+  --paper: #ffffff;
+  --pink: #f69cc6;
+  --pink-hover: #f27fb4;
+  --pink-soft: #fde7f1;
+  --pink-strong: #f05fa3;
+  --pink-ink: #c8126a;
+  --ink: #000000;
+  --ink-muted: #5c5c5c;
+  --on-pink: #000000;
+  --line: #000000;
+  --hairline: #e8e2e5;
+  --disabled-fill: #f2eff0;
+  /* Darker than Highlighter's #8c8689 so busy labels stay readable (4.7:1 on disabled-fill). */
+  --disabled-ink: #6b6668;
+  --green-ink: #16733f;
+  --green-soft: #ddf4e6;
+  --amber-ink: #875700;
+  --amber-soft: #fff0cc;
+  --orange-ink: #b83600;
+  --orange-soft: #ffe5da;
+  --blue-ink: #2f5fe0;
+  --focus: #000000;
+
+  --font-serif: "Crate Bell Serif", "Fraunces", Georgia, serif;
+  --font-sans: "Crate Bell Sans", "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --radius-8: 8px;
+  --stroke-2: 2px;
+  --control-h: 48px;
+  --control-h-sm: 40px;
+}
+
+.cb-root {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.cb-root *,
+.cb-root *::before,
+.cb-root *::after {
+  box-sizing: border-box;
+}
+
+.cb-serif {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-variation-settings: "SOFT" 100;
+}
+
+.cb-icon {
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ---------- Buttons ---------- */
+.cb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  min-height: var(--control-h);
+  padding: 0 var(--space-24);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-8);
+  background: transparent;
+  color: var(--ink);
+  font: 400 16px / 22px var(--font-sans);
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    transform 80ms ease;
+}
+.cb-btn--primary {
+  background: var(--pink);
+  border-color: var(--on-pink);
+  color: var(--on-pink);
+}
+.cb-btn--primary:hover {
+  background: var(--pink-hover);
+}
+.cb-btn--secondary:hover,
+.cb-btn--ghost:hover {
+  background: var(--pink-soft);
+}
+.cb-btn--ghost {
+  border-color: transparent;
+  padding: 0 var(--space-8);
+}
+.cb-btn--block {
+  display: flex;
+  width: 100%;
+}
+.cb-btn--sm {
+  min-height: var(--control-h-sm);
+  padding: 0 var(--space-16);
+  font-size: 15px;
+}
+.cb-btn:active {
+  transform: translateY(1px);
+}
+.cb-btn:focus-visible,
+.cb-link:focus-visible,
+.cb-chip:focus-visible,
+.cb-choice input:focus-visible + span {
+  outline: var(--stroke-2) solid var(--focus);
+  outline-offset: 2px;
+}
+.cb-btn:disabled,
+.cb-btn[aria-disabled="true"] {
+  background: var(--disabled-fill);
+  border-color: var(--disabled-ink);
+  border-style: dashed;
+  color: var(--disabled-ink);
+  text-decoration: none;
+  cursor: progress;
+  transform: none;
+}
+
+.cb-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.cb-link:hover {
+  background: var(--pink-soft);
+}
+
+/* ---------- Disc (pink circle holding line art) ---------- */
+.cb-disc {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  background: var(--pink);
+  color: var(--on-pink);
+}
+.cb-disc--xs {
+  width: 32px;
+  height: 32px;
+}
+.cb-disc--xs .cb-icon {
+  width: 20px;
+  height: 20px;
+}
+.cb-disc--lg {
+  width: 160px;
+  height: 160px;
+}
+.cb-disc--md {
+  width: 96px;
+  height: 96px;
+}
+.cb-disc .cb-illustration {
+  width: 78%;
+  height: 78%;
+}
+
+/* ---------- Notices ---------- */
+.cb-notice {
+  display: flex;
+  gap: var(--space-8);
+  align-items: flex-start;
+  padding: var(--space-12) var(--space-16);
+  border-left: 4px solid var(--amber-ink);
+  background: var(--amber-soft);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 22px;
+}
+.cb-notice--success {
+  border-left-color: var(--green-ink);
+  background: var(--green-soft);
+}
+.cb-notice--error {
+  border-left-color: var(--orange-ink);
+  background: var(--orange-soft);
+}
+.cb-notice--info {
+  border-left-color: var(--pink-strong);
+  background: var(--pink-soft);
+}
+.cb-notice .cb-icon {
+  margin-top: 1px;
+}
+
+/* ---------- Chips (toggle buttons) ---------- */
+.cb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.cb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 40px;
+  padding: 0 var(--space-12);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-8);
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 15px / 20px var(--font-sans);
+  cursor: pointer;
+}
+.cb-chip[aria-pressed="true"] {
+  background: var(--pink);
+  border-color: var(--on-pink);
+}
+.cb-chip[aria-pressed="true"] .cb-icon {
+  display: inline-block;
+}
+.cb-chip .cb-icon {
+  display: none;
+  width: 18px;
+  height: 18px;
+}
+.cb-chip:hover {
+  background: var(--pink-soft);
+}
+.cb-chip[aria-pressed="true"]:hover {
+  background: var(--pink-hover);
+}
+
+.cb-muted {
+  color: var(--ink-muted);
+}
+.cb-small {
+  font-size: 13px;
+  line-height: 20px;
+}
+.cb-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-root *,
+  .cb-root *::before,
+  .cb-root *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

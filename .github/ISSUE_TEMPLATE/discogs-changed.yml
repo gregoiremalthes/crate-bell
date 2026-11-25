@@ -1,0 +1,17 @@
+name: Discogs changed something
+description: The pink button or the guide no longer shows up, or shows up in the wrong place
+labels: [discogs-changed]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Discogs page address
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is different?
+      description: For example "no pink button under Add to Wantlist" or "the guide does not fill in the name".
+    validations:
+      required: true

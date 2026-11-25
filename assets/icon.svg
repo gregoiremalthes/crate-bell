@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+  <title>Crate Bell</title>
+  <!-- Pink disc: 96px artwork with 16px padding, as the Chrome Web Store recommends -->
+  <circle cx="64" cy="64" r="46.5" fill="#f69cc6" stroke-width="3"/>
+  <!-- Record -->
+  <circle cx="54" cy="72" r="26" fill="#000" stroke="none"/>
+  <circle cx="54" cy="72" r="20.5" stroke="#6b6b6b" stroke-width="1.2"/>
+  <circle cx="54" cy="72" r="15.5" stroke="#6b6b6b" stroke-width="1.2"/>
+  <circle cx="54" cy="72" r="8.5" fill="#f69cc6" stroke="none"/>
+  <circle cx="54" cy="72" r="1.8" fill="#000" stroke="none"/>
+  <!-- Bell -->
+  <path d="M72 52v-8a12 12 0 0 1 24 0v8l3.5 3.5h-31z" fill="#fff" stroke-width="3.5"/>
+  <path d="M80 59.5a4 4 0 0 0 8 0" stroke-width="3.5"/>
+  <path d="M84 28.5v3.5" stroke-width="3.5"/>
+</svg>
