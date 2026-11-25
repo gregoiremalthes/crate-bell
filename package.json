@@ -38,9 +38,9 @@
     "@biomejs/biome": "^2.2.0",
     "@playwright/test": "^1.55.0",
     "@resvg/resvg-js": "^2.6.2",
-    "happy-dom": "^20.0.0",
-    "typescript": "~5.9.3",
-    "vitest": "^4.0.0",
+    "happy-dom": "^21.0.4",
+    "typescript": "~7.0.2",
+    "vitest": "^5.1.1",
     "wxt": "^0.21.5"
   }
 }
